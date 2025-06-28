@@ -690,7 +690,7 @@ class EnhancedVedicDashaAnalyzer:
         # Birth chart analysis
         strong_planets = []
         for planet, pos in birth_positions.items():
-            if planet != 'Ascendant':
+            if planet != 'Ascendant' and isinstance(pos, dict) and 'zodiacSign' in pos:
                 strength = self.calculate_planetary_strength(planet, pos['zodiacSign'])
                 if strength >= 8.0:
                     strong_planets.append({
@@ -1198,7 +1198,7 @@ Examples:
         birth_positions = results['birth_positions']
         strong_planets = []
         for planet, pos in birth_positions.items():
-            if planet != 'Ascendant':
+            if planet != 'Ascendant' and isinstance(pos, dict) and 'zodiacSign' in pos:
                 strength = analyzer.calculate_planetary_strength(planet, pos['zodiacSign'])
                 if strength >= 8.0:
                     strong_planets.append(f"{planet} in {pos['zodiacSign']}")
