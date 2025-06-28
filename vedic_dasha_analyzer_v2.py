@@ -502,6 +502,91 @@ class EnhancedVedicDashaAnalyzer:
         
         return None
     
+    def analyze_investment_transitions(self, df: pd.DataFrame) -> Dict[str, List]:
+        """Analyze period transitions to identify optimal buy/sell opportunities"""
+        df_sorted = df.sort_values('Date').reset_index(drop=True)
+        
+        buy_opportunities = []
+        sell_opportunities = []
+        hold_recommendations = []
+        
+        for i in range(len(df_sorted) - 1):
+            current_period = df_sorted.iloc[i]
+            next_period = df_sorted.iloc[i + 1]
+            
+            current_score = current_period['Auspiciousness_Score']
+            next_score = next_period['Auspiciousness_Score']
+            score_change = next_score - current_score
+            
+            # Get period after next for better forward-looking analysis
+            future_score = None
+            if i < len(df_sorted) - 2:
+                future_period = df_sorted.iloc[i + 2]
+                future_score = future_period['Auspiciousness_Score']
+            
+            # Determine investment action based on transition analysis
+            action_data = {
+                'current_date': current_period['Date'],
+                'current_end': current_period['End_Date'],
+                'current_score': current_score,
+                'next_score': next_score,
+                'future_score': future_score,
+                'score_change': score_change,
+                'current_combo': self.get_period_combination(current_period),
+                'next_combo': self.get_period_combination(next_period)
+            }
+            
+            # Investment logic: Buy low before high, Sell high before low
+            if current_score <= 4.0 and next_score >= 7.0:
+                # Strong buy: Low current, high next
+                action_data['action'] = 'STRONG BUY'
+                action_data['rationale'] = f'Buy dip ({current_score:.1f}) before surge ({next_score:.1f})'
+                action_data['confidence'] = 'HIGH'
+                buy_opportunities.append(action_data)
+                
+            elif current_score <= 5.0 and score_change >= 2.5:
+                # Accumulate: Moderate current, strong improvement
+                action_data['action'] = 'ACCUMULATE'
+                action_data['rationale'] = f'Build position before {score_change:.1f} point improvement'
+                action_data['confidence'] = 'MEDIUM-HIGH'
+                buy_opportunities.append(action_data)
+                
+            elif current_score >= 7.0 and next_score <= 4.0:
+                # Defensive sell: High current, low next
+                action_data['action'] = 'DEFENSIVE SELL'
+                action_data['rationale'] = f'Exit peak ({current_score:.1f}) before decline ({next_score:.1f})'
+                action_data['confidence'] = 'HIGH'
+                sell_opportunities.append(action_data)
+                
+            elif current_score >= 6.0 and score_change <= -2.0:
+                # Profit taking: Good current, significant decline ahead
+                action_data['action'] = 'PROFIT TAKING'
+                action_data['rationale'] = f'Take gains before {abs(score_change):.1f} point decline'
+                action_data['confidence'] = 'MEDIUM-HIGH'
+                sell_opportunities.append(action_data)
+                
+            elif abs(score_change) <= 1.0 and 4.5 <= current_score <= 6.5:
+                # Hold: Stable periods
+                action_data['action'] = 'HOLD'
+                action_data['rationale'] = f'Stable period, minimal change expected'
+                action_data['confidence'] = 'MEDIUM'
+                hold_recommendations.append(action_data)
+        
+        return {
+            'buy_opportunities': sorted(buy_opportunities, key=lambda x: x['current_score']),
+            'sell_opportunities': sorted(sell_opportunities, key=lambda x: x['current_score'], reverse=True),
+            'hold_recommendations': hold_recommendations[:10]  # Limit holds for readability
+        }
+    
+    def get_period_combination(self, period) -> str:
+        """Get readable planet combination for a period"""
+        if period['Type'] == 'MD':
+            return period['Maha_Lord']
+        elif period['Type'] == 'MD-AD':
+            return f"{period['Maha_Lord']}-{period['Antar_Lord']}"
+        else:
+            return f"{period['Maha_Lord']}-{period['Antar_Lord']}-{period['Pratyantar_Lord']}"
+    
     def save_to_csv(self, analysis_results: Dict[str, Any], custom_output_dir: str = None):
         """Save results to CSV with separate breakdown by dasha type in organized directory structure"""
         symbol = analysis_results['symbol']
@@ -565,16 +650,27 @@ class EnhancedVedicDashaAnalyzer:
         total_periods = len(df)
         type_counts = df['Type'].value_counts()
         
-        # Get current year for near-future analysis
+        # Get current year for analysis
         current_year = datetime.now().year
+        
+        # Filter for investment timeframe (until 2050)
+        investment_start = "2020-01-01"
+        investment_end = "2050-12-31"
+        investment_periods = df[(df['Date'] >= investment_start) & (df['Date'] <= investment_end)]
+        
+        # Analyze transitions for investment opportunities
+        transition_opportunities = self.analyze_investment_transitions(investment_periods)
+        
+        # Get top 10 auspicious periods until 2050 for reference
+        top_auspicious_2050 = investment_periods.nlargest(10, 'Auspiciousness_Score')
+        
+        # Get most inauspicious periods until 2050 (bottom 10) for reference  
+        most_inauspicious_2050 = investment_periods.nsmallest(10, 'Auspiciousness_Score')
+        
+        # Get current/near-future periods for immediate strategy
         near_future_start = f"{current_year}-01-01"
-        near_future_end = f"{current_year + 2}-12-31"
-        
-        # Filter for current/near-future periods
+        near_future_end = f"{current_year + 3}-12-31"
         current_periods = df[(df['Date'] >= near_future_start) & (df['Date'] <= near_future_end)]
-        
-        # Get top periods overall
-        top_periods_all = df.nlargest(10, 'Auspiciousness_Score')
         
         # Get top periods by type
         top_md = df[df['Type'] == 'MD'].nlargest(5, 'Auspiciousness_Score') if not df[df['Type'] == 'MD'].empty else pd.DataFrame()
@@ -681,55 +777,216 @@ class EnhancedVedicDashaAnalyzer:
 
 ---"""
 
-        # Current/Near-future analysis
-        if not current_best.empty:
-            markdown_content += f"""
+        # Investment Strategy Analysis
+        current_best = current_periods.nlargest(5, 'Auspiciousness_Score') if not current_periods.empty else pd.DataFrame()
+        current_worst = current_periods.nsmallest(3, 'Auspiciousness_Score') if not current_periods.empty else pd.DataFrame()
+        
+        markdown_content += f"""
 
-## 📈 Current & Near-Future Timing Analysis ({current_year}-{current_year + 2})
+## 💰 Transition-Based Investment Strategy (2020-2050)
 
-### Best Periods for Strategic Actions
+### 🚀 Prime Buy Opportunities - "Buy the Dip Before the Rip"
 
-| Date Range | Type | Planet Combination | Score | Optimal For |
-|------------|------|-------------------|--------|-------------|"""
+**Investment Thesis:** Buy during low-scoring periods when high-scoring periods are imminent. These opportunities offer maximum upside potential by entering before favorable planetary influences drive stock appreciation.
 
-            for _, period in current_best.head(5).iterrows():
-                date_range = f"{period['Date']} - {period['End_Date']}"
-                if period['Type'] == 'MD':
-                    combo = period['Maha_Lord']
-                elif period['Type'] == 'MD-AD':
-                    combo = f"{period['Maha_Lord']}-{period['Antar_Lord']}"
-                else:
-                    combo = f"{period['Maha_Lord']}-{period['Antar_Lord']}-{period['Pratyantar_Lord']}"
-                
-                score = period['Auspiciousness_Score']
-                optimal_for = "Major strategic initiatives" if score >= 7 else "Strategic planning" if score >= 6 else "Routine operations"
-                
-                markdown_content += f"\n| {date_range} | {period['Type']} | {combo} | {score:.2f} | {optimal_for} |"
+| Date Range | Current Score | Next Score | Change | Action | Rationale | Confidence |
+|------------|---------------|------------|--------|--------|-----------|------------|"""
 
-        # Top periods analysis
+        # Top buy opportunities
+        for opp in transition_opportunities['buy_opportunities'][:10]:
+            date_range = f"{opp['current_date']} - {opp['current_end']}"
+            year = opp['current_date'][:4]
+            status = "🟢 **NOW**" if int(year) == current_year else "🔵 FUTURE" if int(year) > current_year else "🟡 PAST"
+            
+            markdown_content += f"\n| {date_range} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | +{opp['score_change']:.1f} | **{opp['action']}** | {opp['rationale']} | {opp['confidence']} {status} |"
+
+        markdown_content += f"""
+
+### 📉 Strategic Sell Opportunities - "Sell the Peak Before the Decline"
+
+**Exit Thesis:** Sell during high-scoring periods when low-scoring periods are approaching. These opportunities protect gains by exiting before challenging planetary influences pressure stock prices.
+
+| Date Range | Current Score | Next Score | Change | Action | Rationale | Confidence |
+|------------|---------------|------------|--------|--------|-----------|------------|"""
+
+        # Top sell opportunities  
+        for opp in transition_opportunities['sell_opportunities'][:10]:
+            date_range = f"{opp['current_date']} - {opp['current_end']}"
+            year = opp['current_date'][:4]
+            status = "⚠️ **NOW**" if int(year) == current_year else "📅 FUTURE" if int(year) > current_year else "📊 PAST"
+            
+            markdown_content += f"\n| {date_range} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | {opp['score_change']:.1f} | **{opp['action']}** | {opp['rationale']} | {opp['confidence']} {status} |"
+
+        # Near-term transition analysis
+        near_term_transitions = self.analyze_investment_transitions(current_periods)
+        
         markdown_content += f"""
 
 ---
 
-## 🚀 Peak Opportunity Windows (All Time)
+## 📊 Immediate Investment Strategy ({current_year}-{current_year + 3})
 
-### Top 10 Most Auspicious Periods
+### 🎯 Near-Term Transition Opportunities
 
-| Rank | Date | Type | Planet Combination | Score | Era |
-|------|------|------|-------------------|--------|-----|"""
+**Strategy Focus:** Execute optimal timing based on upcoming period transitions rather than current scores alone."""
 
-        for i, (_, period) in enumerate(top_periods_all.head(10).iterrows(), 1):
-            if period['Type'] == 'MD':
-                combo = period['Maha_Lord']
-            elif period['Type'] == 'MD-AD':
-                combo = f"{period['Maha_Lord']}-{period['Antar_Lord']}"
-            else:
-                combo = f"{period['Maha_Lord']}-{period['Antar_Lord']}-{period['Pratyantar_Lord']}"
+        if near_term_transitions['buy_opportunities']:
+            markdown_content += f"""
+
+**🟢 IMMEDIATE BUY SIGNALS - Act Before Price Rise**
+
+| Date Range | Current→Next Score | Change | Action | Timing Strategy |
+|------------|-------------------|--------|--------|-----------------|"""
             
-            year = period['Date'][:4]
-            era = "Historical" if int(year) < current_year else "Current" if int(year) == current_year else "Future"
+            for opp in near_term_transitions['buy_opportunities'][:5]:
+                date_range = f"{opp['current_date']} - {opp['current_end']}"
+                score_transition = f"{opp['current_score']:.1f} → {opp['next_score']:.1f}"
+                change = f"+{opp['score_change']:.1f}"
+                
+                # Enhanced timing strategy
+                if opp['score_change'] >= 3.0:
+                    timing = "🚨 **URGENT** - Begin accumulating immediately"
+                elif opp['score_change'] >= 2.0:
+                    timing = "⚡ **PRIORITY** - Start building position this period"  
+                else:
+                    timing = "📈 **PLANNED** - Gradual accumulation recommended"
+                
+                markdown_content += f"\n| {date_range} | {score_transition} | {change} | **{opp['action']}** | {timing} |"
+
+        if near_term_transitions['sell_opportunities']:
+            markdown_content += f"""
+
+**🔴 IMMEDIATE SELL SIGNALS - Act Before Price Drop**
+
+| Date Range | Current→Next Score | Change | Action | Risk Management |
+|------------|-------------------|--------|--------|-----------------|"""
             
-            markdown_content += f"\n| {i} | {period['Date']} | {period['Type']} | {combo} | {period['Auspiciousness_Score']:.2f} | {era} |"
+            for opp in near_term_transitions['sell_opportunities'][:5]:
+                date_range = f"{opp['current_date']} - {opp['current_end']}"
+                score_transition = f"{opp['current_score']:.1f} → {opp['next_score']:.1f}"
+                change = f"{opp['score_change']:.1f}"
+                
+                # Enhanced risk management
+                if opp['score_change'] <= -3.0:
+                    risk_mgmt = "🚨 **CRITICAL** - Exit positions before period ends"
+                elif opp['score_change'] <= -2.0:
+                    risk_mgmt = "⚠️ **HIGH PRIORITY** - Reduce exposure significantly"
+                else:
+                    risk_mgmt = "📉 **DEFENSIVE** - Take profits, tighten stops"
+                
+                markdown_content += f"\n| {date_range} | {score_transition} | {change} | **{opp['action']}** | {risk_mgmt} |"
+
+        # Add hold periods if any
+        if near_term_transitions['hold_recommendations']:
+            markdown_content += f"""
+
+**🟡 HOLD PERIODS - Maintain Current Strategy**
+
+| Date Range | Score Range | Action | Strategy |
+|------------|-------------|--------|----------|"""
+            
+            for opp in near_term_transitions['hold_recommendations'][:3]:
+                date_range = f"{opp['current_date']} - {opp['current_end']}"
+                score_range = f"{opp['current_score']:.1f} → {opp['next_score']:.1f}"
+                
+                markdown_content += f"\n| {date_range} | {score_range} | **{opp['action']}** | {opp['rationale']} |"
+
+        # Comprehensive Investment Framework
+        markdown_content += f"""
+
+---
+
+## 🎯 Transition-Based Investment Framework
+
+### Revolutionary Approach: "Buy the Dip, Sell the Rip"
+
+**Core Philosophy:** Success comes from anticipating transitions, not following current conditions. Enter positions during unfavorable periods before they improve, exit during favorable periods before they deteriorate.
+
+### 📈 **Transition-Based Entry Strategy**
+
+#### 🟢 **Strong Buy Criteria** 
+- **Current Score ≤ 4.0 + Next Score ≥ 7.0:** Maximum opportunity - buy the bottom before surge
+- **Score Improvement ≥ 3.0 points:** High-conviction accumulation phase
+- **Final 25% of challenging periods:** Position for reversal
+
+#### 🔵 **Accumulation Criteria**
+- **Current Score ≤ 5.0 + Score Improvement ≥ 2.5:** Build positions gradually  
+- **Transitioning from decline to growth:** Dollar-cost average entry
+- **2-3 periods before major auspicious cycles:** Strategic pre-positioning
+
+#### 🟡 **Hold Criteria**
+- **Score changes ≤ 1.0 point:** Maintain current allocation
+- **Neutral transitions (4.5-6.5 range):** No major adjustments needed
+- **Stable periods with unclear direction:** Wait for better signals
+
+### 📉 **Transition-Based Exit Strategy**
+
+#### 🔴 **Defensive Sell Criteria**
+- **Current Score ≥ 7.0 + Next Score ≤ 4.0:** Exit peak before crash
+- **Score Decline ≥ 3.0 points:** High-conviction reduction phase  
+- **Final 25% of excellent periods:** Protect gains before reversal
+
+#### 🟠 **Profit Taking Criteria**
+- **Current Score ≥ 6.0 + Score Decline ≥ 2.0:** Partial position reduction
+- **Transitioning from growth to decline:** Gradual profit realization
+- **2-3 periods before major challenging cycles:** Strategic de-risking
+
+### 🎯 **Dynamic Portfolio Allocation**
+
+**{symbol} Allocation Strategy Based on Transition Analysis:**
+
+| Phase | Allocation | Criteria | Action |
+|-------|------------|----------|---------|
+| **Pre-Surge** | 35-50% | Score improving 3.0+ points | Maximum accumulation |
+| **Growth** | 25-35% | Score 6.0-8.0, stable/improving | Hold core position |  
+| **Peak** | 15-25% | Score 7.0+, deteriorating | Begin profit taking |
+| **Pre-Decline** | 5-15% | Score declining 2.0+ points | Defensive positioning |
+| **Bottom** | 20-30% | Score ≤ 4.0, improving ahead | Strategic re-entry |
+
+### 🛡️ **Enhanced Risk Management**
+
+#### **Transition Risk Assessment**
+- **High Risk:** Score drops ≥3.0 points → Reduce exposure 50-75%
+- **Moderate Risk:** Score drops 2.0-2.9 points → Reduce exposure 25-50%
+- **Low Risk:** Score changes <2.0 points → Maintain strategy
+- **Opportunity:** Score improves ≥2.5 points → Increase exposure
+
+#### **Protection-Enhanced Positioning** 
+- **Triple Protection Periods:** 1.5x normal allocation (maximum confidence)
+- **Double Protection Periods:** 1.25x normal allocation
+- **Single Protection Periods:** 1.0x normal allocation
+- **No Protection Periods:** 0.75x normal allocation (defensive)
+
+### 📊 **Performance Targets by Transition Type**
+
+#### **Buy Opportunities (Score Improvements)**
+- **+4.0+ point improvement:** Target 75-150% returns
+- **+3.0-3.9 point improvement:** Target 50-75% returns  
+- **+2.0-2.9 point improvement:** Target 25-50% returns
+- **+1.5-1.9 point improvement:** Target 10-25% returns
+
+#### **Risk Management (Score Deterioration)**
+- **-3.0+ point decline:** Protect against 30-60% drawdown
+- **-2.0-2.9 point decline:** Protect against 15-30% drawdown
+- **-1.5-1.9 point decline:** Protect against 5-15% drawdown
+
+### 🔄 **Implementation Timeline**
+
+#### **Monthly Reviews**
+1. **Transition Analysis:** Identify upcoming score changes 1-3 periods ahead
+2. **Position Adjustment:** Align allocation with transition predictions
+3. **Risk Assessment:** Update protection status and exposure levels
+
+#### **Weekly Monitoring**  
+1. **Current Period Status:** Monitor for early transition signals
+2. **Technical Confirmation:** Verify astrological predictions with price action
+3. **Trigger Preparation:** Ready orders for anticipated transitions
+
+#### **Daily Execution**
+1. **Entry Timing:** Execute buys in final weeks of low-score periods
+2. **Exit Timing:** Execute sells in final weeks of high-score periods  
+3. **Stop Management:** Adjust protective stops based on transition proximity
+"""
 
         # Protection analysis
         markdown_content += f"""
