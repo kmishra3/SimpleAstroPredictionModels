@@ -748,27 +748,61 @@ class EnhancedVedicDashaAnalyzer:
         return analysis
     
     def calculate_dasha_auspiciousness(self, birth_positions: Dict, dasha_start_date: str,
-                                    dasha_planet: str, dasha_type: str, birth_time_str: str = "13:38:00") -> Dict[str, Any]:
-        """Calculate comprehensive dasha auspiciousness with all rules"""
+                                    dasha_planet: str, dasha_type: str, birth_time_str: str = "13:38:00", 
+                                    entity_birth_date: str = None) -> Dict[str, Any]:
+        """
+        Calculate comprehensive dasha auspiciousness with birth-time dasha-aarambha correction
+        
+        Key Rule: For dashas already running at entity birth, use birth-time planetary positions
+        for dasha-aarambha strength calculation, not cosmic dasha start positions.
+        """
         try:
-            # Parse date and create datetime with birth time
-            dt = datetime.strptime(dasha_start_date, '%Y-%m-%d')
-            
-            # Parse birth time
+            # Parse dasha start date and create datetime with birth time
+            dasha_dt = datetime.strptime(dasha_start_date, '%Y-%m-%d')
             birth_hour, birth_minute, birth_second = map(int, birth_time_str.split(':'))
-            dt = dt.replace(hour=birth_hour, minute=birth_minute, second=birth_second)
+            dasha_dt = dasha_dt.replace(hour=birth_hour, minute=birth_minute, second=birth_second)
+            dasha_dt_local = self.birth_tz.localize(dasha_dt)
             
-            # Localize to birth timezone (handles DST automatically)
-            dt_local = self.birth_tz.localize(dt)
+            # CRITICAL FIX: Determine if dasha was already running at entity birth
+            use_birth_positions_for_aarambha = False
+            aarambha_positions = None
             
-            dasha_positions = self.get_planetary_positions(dt_local)
+            if entity_birth_date:
+                entity_birth_dt = datetime.strptime(entity_birth_date, '%Y-%m-%d')
+                entity_birth_dt = entity_birth_dt.replace(hour=birth_hour, minute=birth_minute, second=birth_second)
+                entity_birth_dt_local = self.birth_tz.localize(entity_birth_dt)
+                
+                # If dasha started before or at entity birth, use birth-time positions for aarambha
+                if dasha_dt_local <= entity_birth_dt_local:
+                    use_birth_positions_for_aarambha = True
+                    aarambha_positions = birth_positions  # Use the birth positions directly
+                    print(f"   🎯 Dasha-aarambha correction: Using birth-time positions for {dasha_planet} (dasha active at birth)")
+                else:
+                    # Dasha starts after birth, use actual dasha start positions
+                    aarambha_positions = self.get_planetary_positions(dasha_dt_local)
+                    print(f"   📅 Standard dasha-aarambha: Using dasha start positions for {dasha_planet}")
+            else:
+                # No entity birth date provided, use dasha start positions (legacy behavior)
+                aarambha_positions = self.get_planetary_positions(dasha_dt_local)
             
-            # 1. Dasha lord strength at start
+            # Get current dasha positions for other calculations
+            dasha_positions = self.get_planetary_positions(dasha_dt_local)
+            
+            # 1. Dasha lord strength at aarambha (corrected logic)
+            if use_birth_positions_for_aarambha and dasha_planet in birth_positions:
+                # Use birth-time position for dasha lord strength
+                aarambha_sign = birth_positions[dasha_planet].get('zodiacSign', '')
+                aarambha_longitude = birth_positions[dasha_planet].get('longitude', 0)
+            else:
+                # Use dasha start position
+                aarambha_sign = dasha_positions.get(dasha_planet, {}).get('zodiacSign', '')
+                aarambha_longitude = dasha_positions.get(dasha_planet, {}).get('longitude', 0)
+            
             dasha_lord_strength_result = self.calculate_planetary_strength(
                 planet=dasha_planet, 
-                sign=dasha_positions.get(dasha_planet, {}).get('zodiacSign', ''),
+                sign=aarambha_sign,
                 is_dasha_start=True,
-                all_positions=dasha_positions, 
+                all_positions=aarambha_positions if isinstance(aarambha_positions, dict) and 'Sun' in aarambha_positions else dasha_positions, 
                 reference_longitude=birth_positions.get('Ascendant', {}).get('longitude', 0)
             )
             dasha_lord_strength = dasha_lord_strength_result['strength_10']
@@ -986,7 +1020,7 @@ class EnhancedVedicDashaAnalyzer:
             maha_dashas = data['dashaData']['mahaDasha']
             for start_date, maha_dasha in sorted(maha_dashas.items()):
                 analysis = self.calculate_dasha_auspiciousness(
-                    birth_positions, start_date, maha_dasha['lord'], 'Maha Dasha', birth_time
+                    birth_positions, start_date, maha_dasha['lord'], 'Maha Dasha', birth_time, birth_date
                 )
                 
                 period_data = {
@@ -1016,7 +1050,7 @@ class EnhancedVedicDashaAnalyzer:
             bhuktis = data['dashaData']['bhukti']
             for start_date, bhukti in sorted(bhuktis.items()):
                 analysis = self.calculate_dasha_auspiciousness(
-                    birth_positions, start_date, bhukti['lord'], 'Antar Dasha', birth_time
+                    birth_positions, start_date, bhukti['lord'], 'Antar Dasha', birth_time, birth_date
                 )
                 
                 period_data = {
@@ -1053,7 +1087,7 @@ class EnhancedVedicDashaAnalyzer:
                     antar_lord = self.find_active_lord(start_date, bhuktis)
                     
                     analysis = self.calculate_dasha_auspiciousness(
-                        birth_positions, start_date, pratyantar['lord'], 'Pratyantar Dasha', birth_time
+                        birth_positions, start_date, pratyantar['lord'], 'Pratyantar Dasha', birth_time, birth_date
                     )
                     
                     period_data = {
