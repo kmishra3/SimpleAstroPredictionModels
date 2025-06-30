@@ -14,11 +14,103 @@ from typing import Dict, List, Tuple, Any, Optional
 import os
 import argparse
 import sys
+import platform
+from pathlib import Path
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
+import markdown
+from weasyprint import HTML, CSS
 
-# Swiss Ephemeris setup
-swe.set_ephe_path('/opt/homebrew/share/swisseph')  # Path for macOS with Homebrew
+def setup_swiss_ephemeris():
+    """
+    Auto-detect and set Swiss Ephemeris path for cross-platform compatibility
+    """
+    def find_ephemeris_path():
+        """Find Swiss Ephemeris data files across different platforms and installations"""
+        
+        # Common Swiss Ephemeris paths to check
+        possible_paths = []
+        
+        # Get the system platform
+        system = platform.system().lower()
+        
+        if system == "darwin":  # macOS
+            possible_paths.extend([
+                "/opt/homebrew/share/swisseph",  # Homebrew ARM64
+                "/usr/local/share/swisseph",     # Homebrew Intel
+                "/opt/local/share/swisseph",     # MacPorts
+                "/usr/share/swisseph",           # System install
+                str(Path.home() / ".local/share/swisseph"),  # User install
+            ])
+        elif system == "linux":  # Linux
+            possible_paths.extend([
+                "/usr/share/swisseph",           # System package
+                "/usr/local/share/swisseph",     # Compiled install
+                "/opt/swisseph",                 # Optional install
+                str(Path.home() / ".local/share/swisseph"),  # User install
+                "/app/swisseph",                 # Docker/container
+                "/tmp/swisseph",                 # Temporary cloud install
+            ])
+        elif system == "windows":  # Windows
+            possible_paths.extend([
+                "C:/swisseph",
+                "C:/Program Files/swisseph",
+                "C:/Program Files (x86)/swisseph",
+                str(Path.home() / "AppData/Local/swisseph"),
+                str(Path.home() / ".local/share/swisseph"),
+            ])
+        
+        # Also check environment variables
+        env_path = os.environ.get('SWISSEPH_PATH')
+        if env_path and os.path.exists(env_path):
+            possible_paths.insert(0, env_path)
+        
+        # Check if running in a container/cloud environment
+        if os.path.exists('/.dockerenv') or os.environ.get('KUBERNETES_SERVICE_HOST'):
+            possible_paths.extend([
+                "/usr/share/swisseph",
+                "/app/swisseph", 
+                "/opt/swisseph",
+                "/tmp/swisseph"
+            ])
+        
+        # Try to find the path
+        for path in possible_paths:
+            if os.path.exists(path) and os.path.isdir(path):
+                # Check if it contains Swiss Ephemeris files
+                test_files = ['seas_18.se1', 'semo_18.se1', 'sepl_18.se1']
+                if any(os.path.exists(os.path.join(path, f)) for f in test_files):
+                    return path
+        
+        return None
+    
+    # Try to find and set the ephemeris path
+    ephemeris_path = find_ephemeris_path()
+    
+    if ephemeris_path:
+        swe.set_ephe_path(ephemeris_path)
+        print(f"Swiss Ephemeris path set to: {ephemeris_path}")
+    else:
+        # Fallback: let Swiss Ephemeris use its default search
+        print("Warning: Swiss Ephemeris data files not found in standard locations.")
+        print("Swiss Ephemeris will attempt to use built-in data or download files as needed.")
+        print("For better performance, set SWISSEPH_PATH environment variable or install Swiss Ephemeris data files.")
+        
+        # Try to use the package's built-in path if available
+        try:
+            import swisseph
+            package_path = os.path.dirname(swisseph.__file__)
+            data_path = os.path.join(package_path, 'sweph')
+            if os.path.exists(data_path):
+                swe.set_ephe_path(data_path)
+                print(f"Using package ephemeris path: {data_path}")
+            else:
+                print("Using Swiss Ephemeris default/built-in data.")
+        except:
+            print("Using Swiss Ephemeris default configuration.")
+
+# Setup Swiss Ephemeris with auto-detection
+setup_swiss_ephemeris()
 
 class EnhancedVedicDashaAnalyzer:
     """Enhanced Vedic Dasha Analyzer with Swiss Ephemeris and Dasha-Aarambha Rules"""
@@ -96,15 +188,18 @@ class EnhancedVedicDashaAnalyzer:
     def setup_location_timezone(self):
         """Setup timezone based on birth location"""
         try:
-            # Default to New York if location parsing fails
-            default_tz = pytz.timezone('America/New_York')
-            default_lat, default_lon = 40.7128, -74.0060
-            
+            # Default to UTC for cloud environments, but allow location-specific defaults
             if self.birth_location.lower() in ['new york', 'ny', 'new york, usa', 'new york city']:
+                default_tz = pytz.timezone('America/New_York')
+                default_lat, default_lon = 40.7128, -74.0060
                 self.birth_tz = default_tz
                 self.birth_lat, self.birth_lon = default_lat, default_lon
                 print(f"Using location: New York, USA (40.71°N, 74.01°W)")
                 return
+            else:
+                # Use UTC as universal default for portability
+                default_tz = pytz.UTC
+                default_lat, default_lon = 0.0, 0.0  # Equator/Greenwich as neutral default
             
             # Try to geocode the location
             geolocator = Nominatim(user_agent="vedic_dasha_analyzer")
@@ -123,19 +218,19 @@ class EnhancedVedicDashaAnalyzer:
                     print(f"Using location: {self.birth_location} ({self.birth_lat:.2f}°, {self.birth_lon:.2f}°)")
                     print(f"Timezone: {tz_name}")
                 else:
-                    print(f"Warning: Could not determine timezone for {self.birth_location}, using New York timezone")
+                    print(f"Warning: Could not determine timezone for {self.birth_location}, using UTC default")
                     self.birth_tz = default_tz
                     self.birth_lat, self.birth_lon = default_lat, default_lon
             else:
-                print(f"Warning: Could not geocode location '{self.birth_location}', using New York as default")
+                print(f"Warning: Could not geocode location '{self.birth_location}', using UTC as default")
                 self.birth_tz = default_tz
                 self.birth_lat, self.birth_lon = default_lat, default_lon
                 
         except Exception as e:
             print(f"Error setting up location: {e}")
-            print("Falling back to New York, USA")
-            self.birth_tz = pytz.timezone('America/New_York')
-            self.birth_lat, self.birth_lon = 40.7128, -74.0060
+            print("Falling back to UTC timezone for portability")
+            self.birth_tz = pytz.UTC
+            self.birth_lat, self.birth_lon = 0.0, 0.0
         
     def julian_day_from_datetime(self, dt: datetime) -> float:
         """Convert datetime to Julian Day for Swiss Ephemeris"""
@@ -409,7 +504,7 @@ class EnhancedVedicDashaAnalyzer:
                 birth_positions, start_date, maha_dasha['lord'], 'Maha Dasha', birth_time
             )
             
-            results.append({
+            period_data = {
                 'Date': start_date,
                 'End_Date': maha_dasha['endDate'],
                 'Type': 'MD',
@@ -423,7 +518,11 @@ class EnhancedVedicDashaAnalyzer:
                 'Arishta_Protections': len(analysis.get('arishta_bhanga', {}).get('protections', [])),
                 'Protection_Score': analysis.get('arishta_bhanga', {}).get('protection_score', 0),
                 'Sun_Moon_Support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
-            })
+            }
+            
+            # Add astrological significance
+            period_data['Astrological_Significance'] = self.get_astrological_significance_dict(period_data)
+            results.append(period_data)
         
         # Process Antar Dashas (Bhuktis)
         bhuktis = data['dashaData']['bhukti']
@@ -432,7 +531,7 @@ class EnhancedVedicDashaAnalyzer:
                 birth_positions, start_date, bhukti['lord'], 'Antar Dasha', birth_time
             )
             
-            results.append({
+            period_data = {
                 'Date': start_date,
                 'End_Date': bhukti['endDate'],
                 'Type': 'MD-AD',
@@ -446,7 +545,11 @@ class EnhancedVedicDashaAnalyzer:
                 'Arishta_Protections': len(analysis.get('arishta_bhanga', {}).get('protections', [])),
                 'Protection_Score': analysis.get('arishta_bhanga', {}).get('protection_score', 0),
                 'Sun_Moon_Support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
-            })
+            }
+            
+            # Add astrological significance
+            period_data['Astrological_Significance'] = self.get_astrological_significance_dict(period_data)
+            results.append(period_data)
         
         # Process Pratyantar Dashas (if available)
         if 'antaram' in data['dashaData']:
@@ -462,7 +565,7 @@ class EnhancedVedicDashaAnalyzer:
                     birth_positions, start_date, pratyantar['lord'], 'Pratyantar Dasha', birth_time
                 )
                 
-                results.append({
+                period_data = {
                     'Date': start_date,
                     'End_Date': pratyantar['endDate'],
                     'Type': 'MD-AD-PD',
@@ -476,7 +579,11 @@ class EnhancedVedicDashaAnalyzer:
                     'Arishta_Protections': len(analysis.get('arishta_bhanga', {}).get('protections', [])),
                     'Protection_Score': analysis.get('arishta_bhanga', {}).get('protection_score', 0),
                     'Sun_Moon_Support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
-                })
+                }
+                
+                # Add astrological significance
+                period_data['Astrological_Significance'] = self.get_astrological_significance_dict(period_data)
+                results.append(period_data)
         
         return {
             'symbol': symbol,
@@ -502,6 +609,116 @@ class EnhancedVedicDashaAnalyzer:
         
         return None
     
+    def get_astrological_significance(self, period: pd.Series, analysis_type: str = "general") -> str:
+        """Generate astrological significance explanation for a period"""
+        dasha_lord = period.get('Planet', '')
+        maha_lord = period.get('Maha_Lord', '')
+        antar_lord = period.get('Antar_Lord', '')
+        pratyantar_lord = period.get('Pratyantar_Lord', '')
+        protection_count = period.get('Arishta_Protections', 0)
+        dasha_lord_strength = period.get('Dasha_Lord_Strength', 5.0)
+        sun_moon_support = period.get('Sun_Moon_Support', 0.5)
+        
+        significance_parts = []
+        
+        # Dasha lord characteristics
+        planet_nature = "benefic" if dasha_lord in self.natural_benefics else "malefic"
+        significance_parts.append(f"{dasha_lord} dasha ({planet_nature})")
+        
+        # Strength analysis
+        if dasha_lord_strength >= 8.0:
+            strength_desc = "exceptionally strong (exalted/own sign)"
+        elif dasha_lord_strength >= 7.0:
+            strength_desc = "strong dignity"
+        elif dasha_lord_strength >= 5.0:
+            strength_desc = "moderate strength"
+        else:
+            strength_desc = "challenged (debilitated/enemy sign)"
+        
+        significance_parts.append(f"lord in {strength_desc}")
+        
+        # Protection analysis
+        if protection_count >= 3:
+            significance_parts.append("triple Arishta-Bhanga protection")
+        elif protection_count >= 2:
+            significance_parts.append("strong protective cancellations")
+        elif protection_count >= 1:
+            significance_parts.append("moderate protective influence")
+        
+        # Sun-Moon support
+        if sun_moon_support >= 0.7:
+            significance_parts.append("strong luminaries support")
+        elif sun_moon_support >= 0.5:
+            significance_parts.append("balanced solar-lunar influence")
+        else:
+            significance_parts.append("challenging luminaries configuration")
+        
+        # Multi-level dasha analysis
+        if antar_lord and antar_lord != maha_lord:
+            antar_nature = "benefic" if antar_lord in self.natural_benefics else "malefic"
+            significance_parts.append(f"{antar_lord} sub-period ({antar_nature})")
+        
+        if pratyantar_lord and pratyantar_lord not in [maha_lord, antar_lord]:
+            prat_nature = "benefic" if pratyantar_lord in self.natural_benefics else "malefic"
+            significance_parts.append(f"{pratyantar_lord} micro-period ({prat_nature})")
+        
+        return "; ".join(significance_parts)
+
+    def get_astrological_significance_dict(self, period_dict: Dict[str, Any]) -> str:
+        """Generate astrological significance explanation for a period (dict version)"""
+        dasha_lord = period_dict.get('Planet', '')
+        maha_lord = period_dict.get('Maha_Lord', '')
+        antar_lord = period_dict.get('Antar_Lord', '')
+        pratyantar_lord = period_dict.get('Pratyantar_Lord', '')
+        protection_count = period_dict.get('Arishta_Protections', 0)
+        dasha_lord_strength = period_dict.get('Dasha_Lord_Strength', 5.0)
+        sun_moon_support = period_dict.get('Sun_Moon_Support', 0.5)
+        
+        significance_parts = []
+        
+        # Dasha lord characteristics
+        planet_nature = "benefic" if dasha_lord in self.natural_benefics else "malefic"
+        significance_parts.append(f"{dasha_lord} dasha ({planet_nature})")
+        
+        # Strength analysis
+        if dasha_lord_strength >= 8.0:
+            strength_desc = "exceptionally strong (exalted/own sign)"
+        elif dasha_lord_strength >= 7.0:
+            strength_desc = "strong dignity"
+        elif dasha_lord_strength >= 5.0:
+            strength_desc = "moderate strength"
+        else:
+            strength_desc = "challenged (debilitated/enemy sign)"
+        
+        significance_parts.append(f"lord in {strength_desc}")
+        
+        # Protection analysis
+        if protection_count >= 3:
+            significance_parts.append("triple Arishta-Bhanga protection")
+        elif protection_count >= 2:
+            significance_parts.append("strong protective cancellations")
+        elif protection_count >= 1:
+            significance_parts.append("moderate protective influence")
+        
+        # Sun-Moon support
+        if sun_moon_support >= 0.7:
+            significance_parts.append("strong luminaries support")
+        elif sun_moon_support >= 0.5:
+            significance_parts.append("balanced solar-lunar influence")
+        else:
+            significance_parts.append("challenging luminaries configuration")
+        
+        # Multi-level dasha analysis
+        if antar_lord and antar_lord != maha_lord:
+            antar_nature = "benefic" if antar_lord in self.natural_benefics else "malefic"
+            significance_parts.append(f"{antar_lord} sub-period ({antar_nature})")
+        
+        if pratyantar_lord and pratyantar_lord not in [maha_lord, antar_lord]:
+            prat_nature = "benefic" if pratyantar_lord in self.natural_benefics else "malefic"
+            significance_parts.append(f"{pratyantar_lord} micro-period ({prat_nature})")
+        
+        return "; ".join(significance_parts)
+
     def analyze_investment_transitions(self, df: pd.DataFrame) -> Dict[str, List]:
         """Analyze period transitions to identify optimal buy/sell opportunities"""
         df_sorted = df.sort_values('Date').reset_index(drop=True)
@@ -524,6 +741,11 @@ class EnhancedVedicDashaAnalyzer:
                 future_period = df_sorted.iloc[i + 2]
                 future_score = future_period['Auspiciousness_Score']
             
+            # Generate MD-AD-PD combination and astrological analysis
+            current_combo = self.get_period_combination(current_period)
+            next_combo = self.get_period_combination(next_period)
+            current_astro_significance = self.get_astrological_significance(current_period)
+            
             # Determine investment action based on transition analysis
             action_data = {
                 'current_date': current_period['Date'],
@@ -532,50 +754,58 @@ class EnhancedVedicDashaAnalyzer:
                 'next_score': next_score,
                 'future_score': future_score,
                 'score_change': score_change,
-                'current_combo': self.get_period_combination(current_period),
-                'next_combo': self.get_period_combination(next_period)
+                'current_combo': current_combo,
+                'next_combo': next_combo,
+                'md_ad_pd_combo': current_combo,
+                'selection_rationale': '',  # Will be set below based on criteria
+                'astrological_significance': current_astro_significance
             }
             
             # Investment logic: Buy low before high, Sell high before low
             if current_score <= 4.0 and next_score >= 7.0:
                 # Strong buy: Low current, high next
                 action_data['action'] = 'STRONG BUY'
-                action_data['rationale'] = f'Buy dip ({current_score:.1f}) before surge ({next_score:.1f})'
+                action_data['rationale'] = f'Buy dip ({current_score:.1f}) before surge ({next_score:.1f}) - {current_astro_significance}'
                 action_data['confidence'] = 'HIGH'
+                action_data['selection_rationale'] = f'Score ≤4.0 + Next ≥7.0: Maximum upside potential with major dasha transition'
                 buy_opportunities.append(action_data)
                 
             elif current_score <= 5.0 and score_change >= 2.5:
                 # Accumulate: Moderate current, strong improvement
                 action_data['action'] = 'ACCUMULATE'
-                action_data['rationale'] = f'Build position before {score_change:.1f} point improvement'
+                action_data['rationale'] = f'Build position before {score_change:.1f} point improvement - {current_astro_significance}'
                 action_data['confidence'] = 'MEDIUM-HIGH'
+                action_data['selection_rationale'] = f'Score ≤5.0 + Improvement ≥2.5: Strong recovery with favorable planetary transition'
                 buy_opportunities.append(action_data)
                 
             elif current_score >= 7.0 and next_score <= 4.0:
                 # Defensive sell: High current, low next
                 action_data['action'] = 'DEFENSIVE SELL'
-                action_data['rationale'] = f'Exit peak ({current_score:.1f}) before decline ({next_score:.1f})'
+                action_data['rationale'] = f'Exit peak ({current_score:.1f}) before decline ({next_score:.1f}) - {current_astro_significance}'
                 action_data['confidence'] = 'HIGH'
+                action_data['selection_rationale'] = f'Score ≥7.0 + Next ≤4.0: Peak-to-trough dasha transition indicates major reversal'
                 sell_opportunities.append(action_data)
                 
             elif current_score >= 6.0 and score_change <= -2.0:
                 # Profit taking: Good current, significant decline ahead
                 action_data['action'] = 'PROFIT TAKING'
-                action_data['rationale'] = f'Take gains before {abs(score_change):.1f} point decline'
+                action_data['rationale'] = f'Take gains before {abs(score_change):.1f} point decline - {current_astro_significance}'
                 action_data['confidence'] = 'MEDIUM-HIGH'
+                action_data['selection_rationale'] = f'Score ≥6.0 + Decline ≥2.0: Protect gains before challenging planetary influence'
                 sell_opportunities.append(action_data)
                 
             elif abs(score_change) <= 1.0 and 4.5 <= current_score <= 6.5:
                 # Hold: Stable periods
                 action_data['action'] = 'HOLD'
-                action_data['rationale'] = f'Stable period, minimal change expected'
+                action_data['rationale'] = f'Stable period, minimal change expected - {current_astro_significance}'
                 action_data['confidence'] = 'MEDIUM'
+                action_data['selection_rationale'] = f'Score 4.5-6.5 + Change ≤1.0: Neutral dasha balance maintains stability'
                 hold_recommendations.append(action_data)
         
         return {
-            'buy_opportunities': sorted(buy_opportunities, key=lambda x: x['current_score']),
-            'sell_opportunities': sorted(sell_opportunities, key=lambda x: x['current_score'], reverse=True),
-            'hold_recommendations': hold_recommendations[:10]  # Limit holds for readability
+            'buy_opportunities': sorted(buy_opportunities, key=lambda x: x['current_date']),
+            'sell_opportunities': sorted(sell_opportunities, key=lambda x: x['current_date']),
+            'hold_recommendations': sorted(hold_recommendations, key=lambda x: x['current_date'])[:10]  # Limit holds for readability
         }
     
     def get_period_combination(self, period) -> str:
@@ -595,36 +825,37 @@ class EnhancedVedicDashaAnalyzer:
         if custom_output_dir:
             output_dir = custom_output_dir
         else:
-            output_dir = f"analysis/{symbol}"
+            output_dir = os.path.join("analysis", symbol)
         
         os.makedirs(output_dir, exist_ok=True)
         
         df = pd.DataFrame(analysis_results['results'])
-        df_sorted = df.sort_values('Date')
+        # Ensure proper ascending date sort for all data
+        df_sorted = df.sort_values('Date', ascending=True).reset_index(drop=True)
         
         # Save complete results
         complete_file = os.path.join(output_dir, f"{symbol}_Enhanced_Dasha_Analysis.csv")
         df_sorted.to_csv(complete_file, index=False)
         
-        # Create separate files by type
+        # Create separate files by type (all sorted by date ascending)
         files_created = [complete_file]
         
         # Maha Dashas only
-        md_only = df_sorted[df_sorted['Type'] == 'MD']
+        md_only = df_sorted[df_sorted['Type'] == 'MD'].sort_values('Date', ascending=True)
         if not md_only.empty:
             md_file = os.path.join(output_dir, f"{symbol}_MahaDashas.csv")
             md_only.to_csv(md_file, index=False)
             files_created.append(md_file)
         
         # Antar Dashas only
-        ad_only = df_sorted[df_sorted['Type'] == 'MD-AD']
+        ad_only = df_sorted[df_sorted['Type'] == 'MD-AD'].sort_values('Date', ascending=True)
         if not ad_only.empty:
             ad_file = os.path.join(output_dir, f"{symbol}_AntarDashas.csv")
             ad_only.to_csv(ad_file, index=False)
             files_created.append(ad_file)
         
         # Pratyantar Dashas only
-        pd_only = df_sorted[df_sorted['Type'] == 'MD-AD-PD']
+        pd_only = df_sorted[df_sorted['Type'] == 'MD-AD-PD'].sort_values('Date', ascending=True)
         if not pd_only.empty:
             pd_file = os.path.join(output_dir, f"{symbol}_PratyantarDashas.csv")
             pd_only.to_csv(pd_file, index=False)
@@ -672,10 +903,10 @@ class EnhancedVedicDashaAnalyzer:
         near_future_end = f"{current_year + 3}-12-31"
         current_periods = df[(df['Date'] >= near_future_start) & (df['Date'] <= near_future_end)]
         
-        # Get top periods by type
-        top_md = df[df['Type'] == 'MD'].nlargest(5, 'Auspiciousness_Score') if not df[df['Type'] == 'MD'].empty else pd.DataFrame()
-        top_ad = df[df['Type'] == 'MD-AD'].nlargest(5, 'Auspiciousness_Score') if not df[df['Type'] == 'MD-AD'].empty else pd.DataFrame()
-        top_pd = df[df['Type'] == 'MD-AD-PD'].nlargest(5, 'Auspiciousness_Score') if not df[df['Type'] == 'MD-AD-PD'].empty else pd.DataFrame()
+        # Get periods by type (sorted by date ascending)
+        top_md = df[df['Type'] == 'MD'].sort_values('Date', ascending=True).head(5) if not df[df['Type'] == 'MD'].empty else pd.DataFrame()
+        top_ad = df[df['Type'] == 'MD-AD'].sort_values('Date', ascending=True).head(5) if not df[df['Type'] == 'MD-AD'].empty else pd.DataFrame()
+        top_pd = df[df['Type'] == 'MD-AD-PD'].sort_values('Date', ascending=True).head(5) if not df[df['Type'] == 'MD-AD-PD'].empty else pd.DataFrame()
         
         # Protection analysis
         protected_periods = len(df[df['Arishta_Protections'] > 0])
@@ -789,8 +1020,8 @@ class EnhancedVedicDashaAnalyzer:
 
 **Investment Thesis:** Buy during low-scoring periods when high-scoring periods are imminent. These opportunities offer maximum upside potential by entering before favorable planetary influences drive stock appreciation.
 
-| Date Range | Current Score | Next Score | Change | Action | Rationale | Confidence |
-|------------|---------------|------------|--------|--------|-----------|------------|"""
+| Date Range | MD-AD-PD Combination | Current Score | Next Score | Change | Action | Selection Criteria | Astrological Significance | Confidence |
+|------------|---------------------|---------------|------------|--------|--------|-------------------|---------------------------|------------|"""
 
         # Top buy opportunities
         for opp in transition_opportunities['buy_opportunities'][:10]:
@@ -798,7 +1029,7 @@ class EnhancedVedicDashaAnalyzer:
             year = opp['current_date'][:4]
             status = "🟢 **NOW**" if int(year) == current_year else "🔵 FUTURE" if int(year) > current_year else "🟡 PAST"
             
-            markdown_content += f"\n| {date_range} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | +{opp['score_change']:.1f} | **{opp['action']}** | {opp['rationale']} | {opp['confidence']} {status} |"
+            markdown_content += f"\n| {date_range} | {opp['md_ad_pd_combo']} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | +{opp['score_change']:.1f} | **{opp['action']}** | {opp['selection_rationale']} | {opp['astrological_significance']} | {opp['confidence']} {status} |"
 
         markdown_content += f"""
 
@@ -806,8 +1037,8 @@ class EnhancedVedicDashaAnalyzer:
 
 **Exit Thesis:** Sell during high-scoring periods when low-scoring periods are approaching. These opportunities protect gains by exiting before challenging planetary influences pressure stock prices.
 
-| Date Range | Current Score | Next Score | Change | Action | Rationale | Confidence |
-|------------|---------------|------------|--------|--------|-----------|------------|"""
+| Date Range | MD-AD-PD Combination | Current Score | Next Score | Change | Action | Selection Criteria | Astrological Significance | Confidence |
+|------------|---------------------|---------------|------------|--------|--------|-------------------|---------------------------|------------|"""
 
         # Top sell opportunities  
         for opp in transition_opportunities['sell_opportunities'][:10]:
@@ -815,7 +1046,7 @@ class EnhancedVedicDashaAnalyzer:
             year = opp['current_date'][:4]
             status = "⚠️ **NOW**" if int(year) == current_year else "📅 FUTURE" if int(year) > current_year else "📊 PAST"
             
-            markdown_content += f"\n| {date_range} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | {opp['score_change']:.1f} | **{opp['action']}** | {opp['rationale']} | {opp['confidence']} {status} |"
+            markdown_content += f"\n| {date_range} | {opp['md_ad_pd_combo']} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | {opp['score_change']:.1f} | **{opp['action']}** | {opp['selection_rationale']} | {opp['astrological_significance']} | {opp['confidence']} {status} |"
 
         # Near-term transition analysis
         near_term_transitions = self.analyze_investment_transitions(current_periods)
@@ -835,8 +1066,8 @@ class EnhancedVedicDashaAnalyzer:
 
 **🟢 IMMEDIATE BUY SIGNALS - Act Before Price Rise**
 
-| Date Range | Current→Next Score | Change | Action | Timing Strategy |
-|------------|-------------------|--------|--------|-----------------|"""
+| Date Range | MD-AD-PD Combination | Current→Next Score | Change | Action | Selection Criteria | Astrological Significance | Timing Strategy |
+|------------|---------------------|-------------------|--------|--------|-------------------|---------------------------|-----------------|"""
             
             for opp in near_term_transitions['buy_opportunities'][:5]:
                 date_range = f"{opp['current_date']} - {opp['current_end']}"
@@ -851,15 +1082,15 @@ class EnhancedVedicDashaAnalyzer:
                 else:
                     timing = "📈 **PLANNED** - Gradual accumulation recommended"
                 
-                markdown_content += f"\n| {date_range} | {score_transition} | {change} | **{opp['action']}** | {timing} |"
+                markdown_content += f"\n| {date_range} | {opp['md_ad_pd_combo']} | {score_transition} | {change} | **{opp['action']}** | {opp['selection_rationale']} | {opp['astrological_significance']} | {timing} |"
 
         if near_term_transitions['sell_opportunities']:
             markdown_content += f"""
 
 **🔴 IMMEDIATE SELL SIGNALS - Act Before Price Drop**
 
-| Date Range | Current→Next Score | Change | Action | Risk Management |
-|------------|-------------------|--------|--------|-----------------|"""
+| Date Range | MD-AD-PD Combination | Current→Next Score | Change | Action | Selection Criteria | Astrological Significance | Risk Management |
+|------------|---------------------|-------------------|--------|--------|-------------------|---------------------------|-----------------|"""
             
             for opp in near_term_transitions['sell_opportunities'][:5]:
                 date_range = f"{opp['current_date']} - {opp['current_end']}"
@@ -874,7 +1105,7 @@ class EnhancedVedicDashaAnalyzer:
                 else:
                     risk_mgmt = "📉 **DEFENSIVE** - Take profits, tighten stops"
                 
-                markdown_content += f"\n| {date_range} | {score_transition} | {change} | **{opp['action']}** | {risk_mgmt} |"
+                markdown_content += f"\n| {date_range} | {opp['md_ad_pd_combo']} | {score_transition} | {change} | **{opp['action']}** | {opp['selection_rationale']} | {opp['astrological_significance']} | {risk_mgmt} |"
 
         # Add hold periods if any
         if near_term_transitions['hold_recommendations']:
@@ -882,14 +1113,14 @@ class EnhancedVedicDashaAnalyzer:
 
 **🟡 HOLD PERIODS - Maintain Current Strategy**
 
-| Date Range | Score Range | Action | Strategy |
-|------------|-------------|--------|----------|"""
+| Date Range | MD-AD-PD Combination | Score Range | Action | Selection Criteria | Astrological Significance | Strategy |
+|------------|---------------------|-------------|--------|-------------------|---------------------------|----------|"""
             
             for opp in near_term_transitions['hold_recommendations'][:3]:
                 date_range = f"{opp['current_date']} - {opp['current_end']}"
                 score_range = f"{opp['current_score']:.1f} → {opp['next_score']:.1f}"
                 
-                markdown_content += f"\n| {date_range} | {score_range} | **{opp['action']}** | {opp['rationale']} |"
+                markdown_content += f"\n| {date_range} | {opp['md_ad_pd_combo']} | {score_range} | **{opp['action']}** | {opp['selection_rationale']} | {opp['astrological_significance']} | {opp['rationale']} |"
 
         # Comprehensive Investment Framework
         markdown_content += f"""
@@ -1049,7 +1280,7 @@ class EnhancedVedicDashaAnalyzer:
 
 ## 🗓️ Maha Dasha Analysis (Major Life Periods)
 
-### Top Maha Dasha Periods
+### Maha Dasha Periods (Chronological)
 
 | Period | Maha Lord | Duration | Auspiciousness | Key Characteristics |
 |--------|-----------|----------|----------------|-------------------|"""
@@ -1106,8 +1337,6 @@ class EnhancedVedicDashaAnalyzer:
 
 ---
 
-*Analysis completed using Enhanced Vedic Dasha Analyzer v2.0 with Swiss Ephemeris precision and classical Dasha-Aarambha rules from Dr. K.S. Charak's methodology.*
-
 **Disclaimer:** This analysis is for educational and strategic planning purposes. Investment decisions should consider multiple factors including fundamental analysis, market conditions, and professional financial advice.
 """
 
@@ -1117,7 +1346,216 @@ class EnhancedVedicDashaAnalyzer:
             f.write(markdown_content)
         
         print(f"\nMarkdown report saved: {os.path.basename(markdown_file)}")
-        return markdown_file
+        
+        # Generate PDF version
+        pdf_file = self.generate_pdf_report(markdown_content, output_dir, symbol)
+        
+        return markdown_file, pdf_file
+    
+    def generate_pdf_report(self, markdown_content: str, output_dir: str, symbol: str) -> str:
+        """Generate PDF version of the markdown report using WeasyPrint"""
+        try:
+            # Convert markdown to HTML
+            html_content = markdown.markdown(markdown_content, extensions=['tables', 'toc'])
+            
+            # Add enhanced CSS styling for better PDF appearance
+            styled_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>{symbol} - Vedic Dasha Analysis Report</title>
+            </head>
+            <body>
+                {html_content}
+            </body>
+            </html>
+            """
+            
+            # Define CSS styles
+            css_styles = CSS(string="""
+                @page {
+                    size: A4;
+                    margin: 0.75in;
+                    @bottom-center {
+                        content: counter(page) " of " counter(pages);
+                        font-size: 10px;
+                        color: #666;
+                    }
+                }
+                
+                body {
+                    font-family: 'Helvetica', 'Arial', sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    font-size: 11px;
+                }
+                
+                h1 {
+                    color: #2c3e50;
+                    font-size: 24px;
+                    border-bottom: 3px solid #3498db;
+                    padding-bottom: 10px;
+                    margin-top: 30px;
+                    margin-bottom: 20px;
+                    page-break-after: avoid;
+                }
+                
+                h2 {
+                    color: #2c3e50;
+                    font-size: 18px;
+                    border-bottom: 1px solid #bdc3c7;
+                    padding-bottom: 5px;
+                    margin-top: 25px;
+                    margin-bottom: 15px;
+                    page-break-after: avoid;
+                }
+                
+                h3 {
+                    color: #34495e;
+                    font-size: 16px;
+                    margin-top: 20px;
+                    margin-bottom: 12px;
+                    page-break-after: avoid;
+                }
+                
+                h4 {
+                    color: #34495e;
+                    font-size: 14px;
+                    margin-top: 15px;
+                    margin-bottom: 10px;
+                    page-break-after: avoid;
+                }
+                
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 15px 0;
+                    font-size: 9px;
+                    page-break-inside: avoid;
+                }
+                
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 6px;
+                    text-align: left;
+                    vertical-align: top;
+                }
+                
+                th {
+                    background-color: #f8f9fa;
+                    font-weight: bold;
+                    color: #2c3e50;
+                }
+                
+                tr:nth-child(even) {
+                    background-color: #f8f9fa;
+                }
+                
+                .strong-buy {
+                    background-color: #d4edda !important;
+                }
+                
+                .sell {
+                    background-color: #f8d7da !important;
+                }
+                
+                blockquote {
+                    border-left: 4px solid #3498db;
+                    margin: 15px 0;
+                    padding: 0 15px;
+                    background-color: #f8f9fa;
+                    font-style: italic;
+                }
+                
+                code {
+                    background-color: #f4f4f4;
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                    font-family: 'Courier New', monospace;
+                    font-size: 10px;
+                }
+                
+                pre {
+                    background-color: #f4f4f4;
+                    padding: 10px;
+                    border-radius: 5px;
+                    overflow-x: auto;
+                    font-family: 'Courier New', monospace;
+                    font-size: 10px;
+                }
+                
+                ul, ol {
+                    margin: 10px 0;
+                    padding-left: 20px;
+                }
+                
+                li {
+                    margin: 5px 0;
+                }
+                
+                p {
+                    margin: 8px 0;
+                    text-align: justify;
+                }
+                
+                .page-break {
+                    page-break-before: always;
+                }
+                
+                strong {
+                    color: #2c3e50;
+                }
+                
+                /* Specific styling for investment tables */
+                table th:first-child {
+                    width: 15%;
+                }
+                
+                table th:nth-child(2) {
+                    width: 15%;
+                }
+                
+                /* Emoji handling */
+                .emoji {
+                    font-size: 12px;
+                }
+            """)
+            
+            # Generate PDF file path
+            pdf_file = os.path.join(output_dir, f"{symbol}_Vedic_Analysis_Report.pdf")
+            
+            # Generate PDF using WeasyPrint
+            HTML(string=styled_html).write_pdf(pdf_file, stylesheets=[css_styles])
+            
+            print(f"PDF report saved: {os.path.basename(pdf_file)}")
+            return pdf_file
+            
+        except ImportError:
+            print(f"Warning: WeasyPrint not installed. PDF generation skipped.")
+            print("Install with: pip install weasyprint")
+            return None
+        except Exception as e:
+            print(f"Warning: Could not generate PDF report: {e}")
+            print("Note: WeasyPrint requires system dependencies that may not be installed.")
+            
+            # Provide platform-specific installation suggestions
+            system = platform.system().lower()
+            if system == "darwin":  # macOS
+                print("For macOS:")
+                print("  - With Homebrew: brew install pango libffi")
+                print("  - Then: pip install weasyprint")
+            elif system == "linux":  # Linux
+                print("For Linux (Ubuntu/Debian): sudo apt-get install build-essential python3-dev python3-pip python3-setuptools python3-wheel python3-cffi libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info")
+                print("For Linux (CentOS/RHEL): sudo yum install redhat-rpm-config python3-devel python3-pip python3-setuptools python3-wheel python3-cffi libffi-devel cairo pango gdk-pixbuf2")
+                print("Then: pip install weasyprint")
+            elif system == "windows":  # Windows
+                print("For Windows: pip install weasyprint")
+                print("Note: Windows installation is usually simpler as dependencies are included")
+            else:
+                print("Please check WeasyPrint documentation for your platform: https://weasyprint.readthedocs.io/en/stable/install.html")
+            
+            return None
     
     def get_planet_characteristics(self, planet: str) -> str:
         """Get brief characteristics for a planet in dasha context"""
@@ -1149,7 +1587,7 @@ Examples:
     
     parser.add_argument('json_file', help='Path to the JSON file containing entity data')
     parser.add_argument('--location', '-l', default='New York, USA', 
-                       help='Birth location (default: New York, USA)')
+                       help='Birth location (default: New York, USA; fallback: UTC timezone)')
     parser.add_argument('--output', '-o', help='Custom output directory (default: analysis/{SYMBOL}/)')
     
     args = parser.parse_args()
@@ -1175,8 +1613,8 @@ Examples:
         # Save results to organized directory structure
         df, output_dir = analyzer.save_to_csv(results, args.output)
         
-        # Generate comprehensive markdown report
-        markdown_file = analyzer.generate_markdown_report(results, df, output_dir)
+        # Generate comprehensive markdown and PDF reports
+        markdown_file, pdf_file = analyzer.generate_markdown_report(results, df, output_dir)
         
         # Generate summary statistics
         print(f"\n" + "=" * 60)
@@ -1240,6 +1678,11 @@ Examples:
         print(f"\n" + "=" * 60)
         print("Analysis completed successfully!")
         print(f"All outputs saved to: {output_dir}/")
+        if pdf_file:
+            print(f"Reports generated: Markdown (.md) and PDF (.pdf)")
+        else:
+            print(f"Reports generated: Markdown (.md)")
+            print(f"Note: PDF generation requires WeasyPrint installation (pip install weasyprint)")
         print("=" * 60)
         
     except Exception as e:
