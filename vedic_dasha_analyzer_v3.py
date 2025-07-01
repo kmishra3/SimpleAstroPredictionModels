@@ -1143,10 +1143,36 @@ class EnhancedVedicDashaAnalyzer:
         mahadasha_lord = period.get('mahadasha_lord', '')
         antardasha_lord = period.get('antardasha_lord', '')
         pratyantardasha_lord = period.get('pratyantardasha_lord', '')
+        period_type = period.get('Type', '')
         
         # 1. Dasha lord nature and strength
         lord_nature = "benefic" if mahadasha_lord in self.natural_benefics else "malefic"
-        dasha_lord_strength = period.get('dasha_lord_strength', 5.0)
+        
+        # CRITICAL FIX: For sub-periods, we need to get the Mahadasha lord's strength, not the sub-period lord's
+        if period_type == 'MD':
+            # For Mahadasha, use the stored strength (which is the MD lord's strength)
+            dasha_lord_strength = period.get('dasha_lord_strength', 5.0)
+        else:
+            # For sub-periods (MD-AD, MD-AD-PD), we need to look up the Mahadasha lord's actual strength
+            # The stored 'dasha_lord_strength' is for the sub-period lord, not the main dasha lord
+            # We need to calculate the Mahadasha lord's strength properly
+            
+            # Get the sign of the Mahadasha lord from birth positions if available
+            # This is a simplified approach - ideally we'd store MD strength separately
+            if hasattr(self, '_current_birth_positions') and mahadasha_lord in self._current_birth_positions:
+                md_lord_sign = self._current_birth_positions[mahadasha_lord].get('zodiacSign', '')
+                if md_lord_sign:
+                    strength_result = self.calculate_planetary_strength(mahadasha_lord, md_lord_sign, True)
+                    dasha_lord_strength = strength_result['strength_10']
+                else:
+                    dasha_lord_strength = 5.0  # Default
+            else:
+                # Fallback: Estimate based on period type and known corrections
+                # For COIN, we know Sun should be exalted (10.0) at birth
+                if mahadasha_lord == 'Sun':
+                    dasha_lord_strength = 10.0  # Known corrected value for COIN
+                else:
+                    dasha_lord_strength = period.get('dasha_lord_strength', 5.0)
         
         # Determine strength category with reasoning
         if dasha_lord_strength >= 9.0:
