@@ -19,7 +19,12 @@ from pathlib import Path
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import markdown
-from weasyprint import HTML, CSS
+try:
+    from weasyprint import HTML, CSS
+    WEASYPRINT_AVAILABLE = True
+except ImportError:
+    WEASYPRINT_AVAILABLE = False
+    print("Warning: WeasyPrint not available. PDF generation will be disabled.")
 
 def setup_swiss_ephemeris():
     """
@@ -1604,6 +1609,10 @@ class EnhancedVedicDashaAnalyzer:
 
     def generate_pdf_report(self, markdown_content: str, output_dir: str, symbol: str) -> Optional[str]:
         """Generate PDF version of the markdown report using WeasyPrint"""
+        if not WEASYPRINT_AVAILABLE:
+            print(f"Warning: WeasyPrint not available. Skipping PDF generation for {symbol}.")
+            return None
+            
         try:
             # Convert markdown to HTML
             html_content = markdown.markdown(markdown_content, extensions=['tables', 'toc'])
