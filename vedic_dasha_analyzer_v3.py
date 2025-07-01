@@ -1049,8 +1049,24 @@ class EnhancedVedicDashaAnalyzer:
             # Process Antar Dashas (Bhuktis)
             bhuktis = data['dashaData']['bhukti']
             for start_date, bhukti in sorted(bhuktis.items()):
-                analysis = self.calculate_dasha_auspiciousness(
+                # For AD periods, calculate composite auspiciousness: MD (70%) + AD (30%)
+                md_analysis = self.calculate_dasha_auspiciousness(
+                    birth_positions, start_date, bhukti['parentLord'], 'Maha Dasha', birth_time, birth_date
+                )
+                ad_analysis = self.calculate_dasha_auspiciousness(
                     birth_positions, start_date, bhukti['lord'], 'Antar Dasha', birth_time, birth_date
+                )
+                
+                # Composite score with MD having more weight
+                composite_score = (
+                    0.7 * md_analysis['auspiciousness_score'] +
+                    0.3 * ad_analysis['auspiciousness_score']
+                )
+                
+                # Composite strength
+                composite_strength = (
+                    0.7 * md_analysis.get('dasha_lord_strength', 5.0) +
+                    0.3 * ad_analysis.get('dasha_lord_strength', 5.0)
                 )
                 
                 period_data = {
@@ -1062,14 +1078,14 @@ class EnhancedVedicDashaAnalyzer:
                     'Type': 'MD-AD',
                     'Planet': bhukti['lord'],
                     'Parent_Planet': bhukti['parentLord'],
-                    'auspiciousness_score': analysis['auspiciousness_score'],
-                    'dasha_lord_strength': analysis.get('dasha_lord_strength', 5.0),
-                    'protections_count': len(analysis.get('arishta_bhanga', {}).get('protections', [])),
-                    'is_protected': analysis.get('arishta_bhanga', {}).get('is_protected', False),
-                    'sun_strength': analysis.get('sun_moon_analysis', {}).get('sun_preparation', {}).get('strength', 0.0),
-                    'moon_strength': analysis.get('sun_moon_analysis', {}).get('moon_nourishment', {}).get('strength', 0.0),
-                    'luminaries_support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
-                    'sun_moon_support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
+                    'auspiciousness_score': round(composite_score, 2),
+                    'dasha_lord_strength': round(composite_strength, 2),
+                    'protections_count': len(ad_analysis.get('arishta_bhanga', {}).get('protections', [])),
+                    'is_protected': ad_analysis.get('arishta_bhanga', {}).get('is_protected', False),
+                    'sun_strength': ad_analysis.get('sun_moon_analysis', {}).get('sun_preparation', {}).get('strength', 0.0),
+                    'moon_strength': ad_analysis.get('sun_moon_analysis', {}).get('moon_nourishment', {}).get('strength', 0.0),
+                    'luminaries_support': ad_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
+                    'sun_moon_support': ad_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
                 }
                 
                 # Add detailed astrological significance
@@ -1086,8 +1102,29 @@ class EnhancedVedicDashaAnalyzer:
                     maha_lord = self.find_active_lord(start_date, maha_dashas)
                     antar_lord = self.find_active_lord(start_date, bhuktis)
                     
-                    analysis = self.calculate_dasha_auspiciousness(
+                    # For PD periods, we need to calculate a composite auspiciousness considering all three lords
+                    md_analysis = self.calculate_dasha_auspiciousness(
+                        birth_positions, start_date, maha_lord, 'Maha Dasha', birth_time, birth_date
+                    )
+                    ad_analysis = self.calculate_dasha_auspiciousness(
+                        birth_positions, start_date, antar_lord, 'Antar Dasha', birth_time, birth_date  
+                    )
+                    pd_analysis = self.calculate_dasha_auspiciousness(
                         birth_positions, start_date, pratyantar['lord'], 'Pratyantar Dasha', birth_time, birth_date
+                    )
+                    
+                    # Composite auspiciousness: MD (50%) + AD (30%) + PD (20%)
+                    composite_score = (
+                        0.5 * md_analysis['auspiciousness_score'] +
+                        0.3 * ad_analysis['auspiciousness_score'] + 
+                        0.2 * pd_analysis['auspiciousness_score']
+                    )
+                    
+                    # Use weighted average of strengths for display
+                    composite_strength = (
+                        0.5 * md_analysis.get('dasha_lord_strength', 5.0) +
+                        0.3 * ad_analysis.get('dasha_lord_strength', 5.0) +
+                        0.2 * pd_analysis.get('dasha_lord_strength', 5.0)
                     )
                     
                     period_data = {
@@ -1099,14 +1136,14 @@ class EnhancedVedicDashaAnalyzer:
                         'Type': 'MD-AD-PD',
                         'Planet': pratyantar['lord'],
                         'Parent_Planet': antar_lord,
-                        'auspiciousness_score': analysis['auspiciousness_score'],
-                        'dasha_lord_strength': analysis.get('dasha_lord_strength', 5.0),
-                        'protections_count': len(analysis.get('arishta_bhanga', {}).get('protections', [])),
-                        'is_protected': analysis.get('arishta_bhanga', {}).get('is_protected', False),
-                        'sun_strength': analysis.get('sun_moon_analysis', {}).get('sun_preparation', {}).get('strength', 0.0),
-                        'moon_strength': analysis.get('sun_moon_analysis', {}).get('moon_nourishment', {}).get('strength', 0.0),
-                        'luminaries_support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
-                        'sun_moon_support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
+                        'auspiciousness_score': round(composite_score, 2),
+                        'dasha_lord_strength': round(composite_strength, 2),
+                        'protections_count': len(pd_analysis.get('arishta_bhanga', {}).get('protections', [])),
+                        'is_protected': pd_analysis.get('arishta_bhanga', {}).get('is_protected', False),
+                        'sun_strength': pd_analysis.get('sun_moon_analysis', {}).get('sun_preparation', {}).get('strength', 0.0),
+                        'moon_strength': pd_analysis.get('sun_moon_analysis', {}).get('moon_nourishment', {}).get('strength', 0.0),
+                        'luminaries_support': pd_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
+                        'sun_moon_support': pd_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
                     }
                     
                     # Add detailed astrological significance
@@ -1216,7 +1253,8 @@ class EnhancedVedicDashaAnalyzer:
             antar_nature = "benefic" if antardasha_lord in self.natural_benefics else "malefic"
             significance_parts.append(f"{antardasha_lord} sub-period ({antar_nature})")
         
-        if pratyantardasha_lord and pratyantardasha_lord not in [mahadasha_lord, antardasha_lord]:
+        # FIXED: Always mention PD lord when present, even if same as MD or AD lord
+        if pratyantardasha_lord:
             pratyantar_nature = "benefic" if pratyantardasha_lord in self.natural_benefics else "malefic"
             significance_parts.append(f"{pratyantardasha_lord} sub-sub-period ({pratyantar_nature})")
         
