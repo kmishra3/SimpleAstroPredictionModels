@@ -1,0 +1,27 @@
+# Requirements for Enhanced Vedic Dasha Analyzer v3 with sideralib
+# This version uses sideralib instead of pyswisseph for planetary calculations
+
+# Core astronomical calculations (sidereal ephemeris)
+sideralib>=3.0.0
+
+# Data processing and analysis
+pandas>=1.3.0
+numpy>=1.20.0
+
+# Date/time handling and timezone support
+pytz>=2021.1
+
+# Geographic location handling
+geopy>=2.2.0
+timezonefinder>=6.0.0
+
+# Report generation
+markdown>=3.3.0
+weasyprint>=54.0  # For PDF generation (optional)
+
+# JSON data handling (built-in with Python)
+# datetime (built-in with Python)
+# argparse (built-in with Python)
+# os, sys, platform (built-in with Python)
+# pathlib (built-in with Python)
+# typing (built-in with Python) 
