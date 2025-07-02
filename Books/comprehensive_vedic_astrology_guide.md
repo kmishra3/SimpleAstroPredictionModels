@@ -490,133 +490,326 @@ This guide synthesizes the key principles from two foundational Vedic astrology 
 ✅ **Dasha Lord Strong in Both D1 and D9**: Guaranteed results
 ✅ **Benefics Exalted in D9**: Long-term positive outcomes
 
+### 8.11 DASHAMSHA (D10) INTEGRATION: THE CAREER AND PUBLIC SUCCESS PRINCIPLE
+
+*The Dashamsha chart reveals career potential, professional achievements, and public recognition capacity*
+
+#### 8.11.1 FUNDAMENTAL DASHAMSHA CONCEPTS
+
+**Core Principle**: The Dashamsha (D10) chart represents the 10th harmonic, revealing career aptitude, professional success potential, and public recognition capacity.
+
+> **Classical Teaching**: "Highly significant results (must be judged) from the Dashamsha" - Sage Parashara
+
+#### Dashamsha Calculation Method
+- **D10 Division**: Each 30° sign divided into 10 parts of 3° each
+- **Construction Rules**:
+  - **Odd signs** (1,3,5,7,9,11): First Dashamsha starts from the same sign
+  - **Even signs** (2,4,6,8,10,12): First Dashamsha starts from the 9th house (9th sign) from that sign
+- **Precision Required**: Exact planetary longitude needed for accurate D10 calculation
+
+#### Sacred Deity Rulership (Each 3° Division)
+1. **Indra** (0°-3°): Leadership, Authority, Government positions
+2. **Agni** (3°-6°): Energy sectors, Innovation, Management roles
+3. **Yama** (6°-9°): Law, Justice, Administration, Regulation
+4. **Rakshasa** (9°-12°): Competition, Politics, Risk-taking ventures
+5. **Varuna** (12°-15°): Creativity, Arbitration, Fluid/changing careers
+6. **Vayu** (15°-18°): Communication, Travel, Media, Transportation
+7. **Kubera** (18°-21°): Finance, Banking, Wealth management, Treasury
+8. **Isan** (21°-24°): Healing, Counseling, Spiritual/service work
+9. **Brahma** (24°-27°): Innovation, Engineering, Arts, Creation
+10. **Ananth** (27°-30°): Long-term stability, Civil service, Enduring institutions
+
+#### 8.11.2 THE 10:9:8 TRIPLE CHART WEIGHTING SYSTEM
+
+**Enhanced Weighting Rule**:
+- **D1 (Rashi) Chart Weight**: 10/10 (immediate manifestation and current conditions)
+- **D9 (Navamsha) Chart Weight**: 9/10 (underlying strength and sustainability)
+- **D10 (Dashamsha) Chart Weight**: 8/10 (career success potential and public recognition)
+
+#### Practical Application Formula
+**Combined Score** = (D1_Score × 10 + D9_Score × 9 + D10_Score × 8) ÷ 27
+
+#### Triple Chart Decision Matrix Examples
+- **D1: Strong Buy (9) + D9: Buy (7) + D10: Strong Buy (9)** → Combined: Strong Buy (8.4)
+- **D1: Buy (7) + D9: Hold (5) + D10: Buy (7)** → Combined: Buy (6.3)
+- **D1: Hold (5) + D9: Sell (3) + D10: Hold (5)** → Combined: Sell (4.4)
+- **D1: Sell (3) + D9: Strong Sell (1) + D10: Sell (3)** → Combined: Strong Sell (2.6)
+
+#### 8.11.3 D10 VARGOTTAMA: EXCEPTIONAL CAREER STABILITY
+
+**Definition**: When a planet occupies the **same sign** in D1, D9, AND D10 charts (Triple Vargottama) or specific two-chart combinations.
+
+#### D10 Vargottama Benefits
+- **20% Career Bonus**: Planet gains exceptional professional power
+- **Public Recognition**: Enhanced ability to achieve fame and recognition
+- **Career Stability**: Professional path remains consistent and strong
+- **Leadership Qualities**: Natural authority in chosen field
+
+#### Triple Vargottama (D1+D9+D10)
+- **40% Total Bonus**: Combines 25% (D9) + 20% (D10) - 5% overlap = 40%
+- **Exceptional Life Stability**: All three levels (immediate, sustainable, professional) aligned
+- **Guaranteed Success**: When well-placed, virtually guarantees achievement
+
+#### 8.11.4 DASHAMSHA DIGNITY ASSESSMENT
+
+#### Enhanced Career Strength in D10
+**Exalted in D10**: Even if challenged in D1/D9, provides exceptional career potential
+**Own Sign in D10**: Sustains professional significations and career growth
+**Friend's Sign in D10**: Provides moderate professional support
+**Moolatrikona in D10**: Excellent for sustained career advancement
+
+#### Career Weakness Indicators in D10
+**Debilitated in D10**: Undermines career potential despite D1/D9 strength
+**Enemy's Sign in D10**: Creates professional conflicts and career instability
+**Combust in D10**: Reduces ability to achieve public recognition
+
+#### 8.11.5 DEITY-BASED CAREER ANALYSIS
+
+#### Planetary Positions by Deity Rulership
+When analyzing D10 positions, consider which deity rules that 3° segment:
+
+**Indra Periods** (Leadership/Authority):
+- Excellent for government positions, executive roles
+- Enhanced ability to command and lead others
+- Public service and administrative success
+
+**Kubera Periods** (Finance/Wealth):
+- Exceptional for banking, finance, wealth management
+- Success in treasury operations and financial planning
+- Money-making ventures and investment success
+
+**Brahma Periods** (Innovation/Creation):
+- Perfect for engineering, arts, creative fields
+- Innovation and invention capabilities
+- Technical and artistic excellence
+
+**Agni Periods** (Energy/Management):
+- Success in energy sectors, industrial management
+- Leadership in transformation and change initiatives
+- Dynamic and action-oriented career phases
+
+#### 8.11.6 DASHA ANALYSIS WITH TRIPLE CHART SYSTEM
+
+#### Enhanced Dasha Lord Assessment Protocol
+1. **Calculate dasha lord's D1 position** for immediate effects
+2. **Assess D9 position** for sustainability and underlying strength
+3. **Evaluate D10 position** for career and public success potential
+4. **Check for Vargottama status** in any combination of charts
+5. **Apply 10:9:8 weighting** to determine combined dasha quality
+6. **Consider deity rulership** for specific career guidance
+
+#### Super-Enhanced Dasha Interpretation Rules
+
+**Exceptionally Favorable Periods** (Triple Chart Alignment):
+- Dasha lord strong in **all three charts** (D1+D9+D10)
+- **Triple Vargottama** status with benefic influences
+- **Career-supportive deity** (Indra, Kubera, Brahma) + strong chart positions
+
+**Highly Enhanced Career Periods**:
+- **Strong D10** compensates for moderate D1/D9 positions
+- **Beneficial deity rulership** enhances professional outcomes
+- **D10 Vargottama** provides career stability despite other challenges
+
+**Professionally Challenged Periods**:
+- **Strong D1/D9** but **weak D10** = Personal success without public recognition
+- **Poor deity combination** creates professional obstacles
+- **D10 debilitation** undermines career advancement
+
+**Career Crisis Periods**:
+- **Weak in all three charts** = Compound professional difficulties
+- **Malefic deity periods** + **afflicted D10** = Career setbacks
+- **No D10 support** during important professional decisions
+
+#### 8.11.7 PRACTICAL DASHAMSHA TIMING
+
+#### Career Milestone Prediction
+- **Major career changes** often align with strong D10 dasha periods
+- **Public recognition** typically manifests during favorable D10 transits
+- **Professional setbacks** correlate with afflicted D10 combinations
+
+#### Investment Application with D10
+For entities (companies/stocks), D10 analysis reveals:
+- **Public perception** and brand value potential
+- **Management quality** and leadership effectiveness
+- **Long-term career success** of key executives
+- **Industry position** and competitive advantage
+
 ---
 
 ## 9. PRACTICAL APPLICATION FRAMEWORK
 
 ### When You Receive Planetary Data:
 
-#### Step 1: Assess Planetary Strength (D1 & D9)
+#### Step 1: Assess Planetary Strength (D1, D9 & D10)
 1. **Check D1 dignity**: Exalted > Own Sign > Moolatrikona > Friend's > Neutral > Enemy's > Debilitated
 2. **Calculate D9 position**: Determine navamsha placement for underlying strength
-3. **Check Vargottama status**: Same sign in D1 and D9 gives 25% bonus
-4. **Assess D9 dignity**: Evaluate sustainability of planetary promises
-5. **House position**: Angular (strong) > Trine (auspicious) > Succeedent > Cadent
-6. **Aspects**: Benefic aspects strengthen, malefic aspects weaken
+3. **Calculate D10 position**: Determine dashamsha placement for career/public success
+4. **Check Vargottama status**: Same sign combinations (D1+D9, D1+D10, D9+D10, or triple)
+5. **Assess dignity in all charts**: Evaluate complete planetary strength profile
+6. **Consider deity rulership**: Analyze D10 deity influences for career guidance
+7. **House positions**: Angular (strong) > Trine (auspicious) > Succeedent > Cadent in all charts
+8. **Aspects**: Benefic aspects strengthen, malefic aspects weaken across all charts
 
-#### Step 2: Analyze Current Dasha (Dual Chart Assessment)
-1. **Identify Mahadasha lord** and its strength/position in D1
-2. **Calculate dasha lord's D9 position** and dignity
-3. **Check Antardasha lord** in both D1 and D9 charts
-4. **Assess lord relationships** in both charts
-5. **Consider natural qualities** of dasha planets (benefic/malefic)
-6. **Apply 10:9 weighting system** for combined assessment
+#### Step 2: Analyze Current Dasha (Triple Chart Assessment)
+1. **Identify Mahadasha lord** and its strength/position in D1, D9, and D10
+2. **Calculate lord relationships** across all three charts
+3. **Check Antardasha lord** in D1, D9, and D10 charts
+4. **Assess natural qualities** of dasha planets (benefic/malefic) in all charts
+5. **Consider deity influences** from D10 positions
+6. **Apply 10:9:8 weighting system** for comprehensive assessment
 
-#### Step 3: Determine Period Quality (Integrated D1+D9)
-**Exceptionally Auspicious**:
-- Vargottama dasha lord + Exalted/Own in D9
-- Strong D1 placement + Very strong D9 placement
-- Multiple benefic influences in both charts
+#### Step 3: Determine Period Quality (Integrated D1+D9+D10)
+**Exceptionally Auspicious** (Triple Strength):
+- Triple Vargottama dasha lord + Exalted/Own in all charts
+- Strong positions in all three charts with benefic influences
+- Favorable deity combinations (Indra, Kubera, Brahma)
 
-**Highly Auspicious**:
-- Exalted benefic's dasha in good houses (D1) + Strong D9
-- Strong Jupiter or Venus periods with D9 support
-- Dasha lords forming beneficial yogas in both charts
+**Highly Auspicious** (Dual Strength):
+- Strong D1+D9 or D1+D10 or D9+D10 combinations
+- Vargottama in any two chart combination
+- Beneficial deity periods with strong chart support
 
-**Moderately Favorable**:
-- Own sign planets' dashas with moderate D9
-- Well-placed Mercury or bright Moon with D9 support
-- Good D1 combinations with adequate D9 backing
+**Moderately Favorable** (Single Chart Strength):
+- Strong in one chart with moderate support from others
+- Good deity combinations compensating for chart weaknesses
+- Adequate combined weighted score (6.0+)
 
-**Compromised Periods**:
-- Strong D1 but weak D9 (initial success, later challenges)
-- Good D1 promises but poor D9 sustainability
-- Vargottama status compensating for moderate D1 weakness
+**Professionally Enhanced**:
+- Strong D10 position regardless of D1/D9 status
+- Favorable deity rulership during career-focused periods
+- Public recognition potential during these phases
 
-**Challenging Periods**:
-- Debilitated planets' dashas without D9 support
-- Saturn/Mars periods with D9 afflictions
-- 6th, 8th, 12th house lords in both D1 and D9
+**Sustainability Questioned**:
+- Strong D1 but weak D9+D10 (immediate success, poor longevity)
+- Good immediate prospects but poor foundational/career support
 
-**Extremely Difficult**:
-- Multiple malefic combinations in both D1 and D9
-- Debilitated in both charts without cancellation
-- No supportive factors in either chart
+**Career Challenged**:
+- Weak D10 despite strong D1/D9 (personal success without recognition)
+- Unfavorable deity combinations during professional periods
+- Limited public success potential
 
-#### Step 4: Consider Transits (D1 & D9 Integration)
-- **Jupiter transit**: Generally 1 year per sign, brings expansion (check D9 lagna too)
-- **Saturn transit**: 2.5 years per sign, brings lessons (affects D9 sustainability)
-- **Rahu-Ketu transit**: 1.5 years per sign, brings changes (impacts D9 foundation)
-- **D9 specific transits**: Monitor transits to D9 lagna and D9 planets
+**Severely Compromised**:
+- Weak in all three charts without compensating factors
+- Multiple malefic combinations across chart systems
+- No Vargottama support or favorable deity influences
 
-#### Step 5: Apply Navamsha Weighting Formula
-**Combined Score** = (D1_Score × 10 + D9_Score × 9) ÷ 19
-- Add 25% bonus if Vargottama
-- Adjust for D9 specific strengths/weaknesses
-- Consider sustainability factors from D9 analysis
+#### Step 4: Consider Transits (Triple Chart Integration)
+- **Jupiter transit**: Generally 1 year per sign, check impact on all three lagnas
+- **Saturn transit**: 2.5 years per sign, affects all chart foundations
+- **Rahu-Ketu transit**: 1.5 years per sign, impacts all chart systems
+- **D10 specific transits**: Monitor for career timing and public recognition
+- **Deity activation**: When transits activate specific deity-ruled areas
+
+#### Step 5: Apply Triple Chart Weighting Formula
+**Combined Score** = (D1_Score × 10 + D9_Score × 9 + D10_Score × 8) ÷ 27
+- Add Vargottama bonuses: D9 (25%), D10 (20%), Triple (40%)
+- Adjust for deity-specific influences in D10
+- Consider career/public success factors from D10 analysis
+- Evaluate sustainability vs immediate vs professional factors
+
+#### Step 6: Career and Professional Guidance (D10 Specific)
+- **Identify optimal career timing** through D10 dasha analysis
+- **Assess deity-guided career paths** based on planetary D10 positions
+- **Evaluate public recognition potential** during specific periods
+- **Plan professional moves** according to D10 strength periods
+- **Consider industry alignment** with deity significations
 
 ---
 
 ## 10. KEY PRINCIPLES FOR HOROSCOPE ANALYSIS
 
-### Timing Factors (Dual Chart Integration)
-1. **Dasha periods** provide the overall theme (assess in both D1 and D9)
-2. **Transits** trigger specific events (consider both D1 and D9 lagna)
-3. **Progressions** show psychological development
-4. **Return charts** highlight cyclical patterns
-5. **Navamsha timing** reveals sustainability of manifestations
+### Timing Factors (Triple Chart Integration)
+1. **Dasha periods** provide the overall theme (assess in D1, D9, and D10)
+2. **Transits** trigger specific events (consider all three lagna points)
+3. **Progressions** show psychological development across all chart levels
+4. **Return charts** highlight cyclical patterns in all three dimensions
+5. **Triple chart timing** reveals complete manifestation potential
 
-### Synthesis Rules (D1 + D9 Framework)
-1. **Strong benefics in both D1 and D9** can overcome major afflictions
-2. **Vargottama planets** provide exceptional stability and strength
-3. **D1 promises + D9 sustainability** = reliable manifestation
-4. **Strong D1 + Weak D9** = temporary success followed by challenges
-5. **Weak D1 + Strong D9** = slow start but sustained long-term results
-6. **Multiple afflictions in both charts** compound negative effects severely
-7. **Timing must align** - good dashas in both D1 and D9 + good transits = manifestation
-8. **House significance** in both charts determines complete life area impact
-9. **10:9 weighting rule** balances immediate vs long-term factors
+### Synthesis Rules (D1 + D9 + D10 Framework)
+1. **Strong benefics in all three charts** can overcome major afflictions
+2. **Triple Vargottama planets** provide exceptional stability across all life areas
+3. **D1 promises + D9 sustainability + D10 career success** = complete manifestation
+4. **Strong D1+D9 + Weak D10** = personal success without public recognition
+5. **Strong D1+D10 + Weak D9** = immediate public success with sustainability questions
+6. **Strong D9+D10 + Weak D1** = slow start but sustained professional growth
+7. **Weak in multiple charts** compounds negative effects proportionally
+8. **Triple chart timing alignment** (good dashas + good transits) = optimal manifestation
+9. **Deity guidance from D10** provides specific career direction
+10. **10:9:8 weighting rule** balances immediate vs sustainable vs professional factors
 
-### Navamsha Priority Principles
-1. **Vargottama status** always enhances any planetary combination
-2. **D9 debilitation** can undermine even exalted D1 positions
-3. **Sustainability factor** from D9 is crucial for long-term decisions
-4. **D9 lagna lord strength** indicates overall life foundation quality
-5. **Combined assessment** is more reliable than single chart analysis
+### Enhanced Priority Principles
+1. **Triple Vargottama status** provides maximum stability and strength
+2. **D10 debilitation** can limit career success despite D1/D9 strength
+3. **Deity alignment** from D10 is crucial for career decisions
+4. **Professional timing** from D10 is essential for public recognition
+5. **Complete triple assessment** is most reliable for major life decisions
+6. **Career sustainability** requires both D9 and D10 support
+7. **Public success potential** is primarily revealed through D10 analysis
+
+### Dashamsha Priority Applications
+1. **Career timing**: Use D10 dasha periods for professional moves
+2. **Public ventures**: Assess D10 strength before launching public initiatives
+3. **Leadership roles**: Strong D10 positions indicate natural authority
+4. **Industry selection**: Match deity significations with career choices
+5. **Recognition timing**: Plan public announcements during strong D10 periods
+6. **Professional partnerships**: Consider D10 compatibility for business ventures
 
 ---
 
 ## 11. CONCLUSION
 
-This comprehensive framework provides the foundation for interpreting any set of planetary positions and dashas using the classical dual-chart approach. The enhanced methodology includes:
+This comprehensive framework provides the foundation for interpreting any set of planetary positions and dashas using the enhanced triple-chart approach. The complete methodology includes:
 
 ### Core Analysis Steps:
-1. **Assess planetary strength in both D1 (Rashi) and D9 (Navamsha) charts**
-2. **Calculate Vargottama status for exceptional strength indicators**
-3. **Understand house significance in both chart systems**  
-4. **Analyze dasha combinations using 10:9 weighting system**
-5. **Apply Dasha-Aarambha principles for precise timing**
-6. **Integrate navamsha sustainability factors**
-7. **Synthesize for complete judgment balancing immediate and long-term factors**
+1. **Assess planetary strength in D1 (Rashi), D9 (Navamsha), and D10 (Dashamsha) charts**
+2. **Calculate all Vargottama combinations for exceptional strength indicators**
+3. **Understand house significance across all three chart systems**
+4. **Analyze dasha combinations using 10:9:8 weighting system**
+5. **Apply Dasha-Aarambha principles for precise timing across all charts**
+6. **Integrate navamsha sustainability and dashamsha career factors**
+7. **Consider deity guidance from D10 for career direction**
+8. **Synthesize for complete judgment balancing immediate, sustainable, and professional factors**
 
-### The Dual Chart Advantage:
-- **D1 Chart**: Reveals immediate manifestation potential and surface-level promises
-- **D9 Chart**: Reveals underlying strength, sustainability, and long-term outcomes
-- **Combined Analysis**: Provides complete picture of both promise and fulfillment capacity
-- **10:9 Weighting**: Balances immediate prospects with foundational strength
+### The Triple Chart Advantage:
+- **D1 Chart**: Reveals immediate manifestation potential and current surface conditions
+- **D9 Chart**: Reveals underlying strength, sustainability, and foundational support
+- **D10 Chart**: Reveals career potential, public success, and professional recognition capacity
+- **Combined Analysis**: Provides complete picture of immediate prospects, long-term sustainability, and career success
+- **10:9:8 Weighting**: Balances immediate prospects with foundational strength and professional potential
 
-### Practical Benefits:
-- **More reliable predictions** through dual verification
-- **Enhanced timing accuracy** using both chart systems
-- **Sustainability assessment** prevents overconfidence in weak foundations
-- **Vargottama identification** highlights exceptionally stable periods
-- **Balanced decision-making** for both short-term and long-term planning
+### Enhanced Practical Benefits:
+- **Most reliable predictions** through triple verification
+- **Enhanced timing accuracy** using all three chart systems
+- **Complete success assessment** covering personal, sustainable, and professional dimensions
+- **Career guidance** through deity-based D10 analysis
+- **Exceptional stability identification** through triple Vargottama detection
+- **Balanced decision-making** for short-term, long-term, and career planning
 
-### Classical Integration:
-This framework honors traditional Vedic principles while providing practical tools for modern analysis. The navamsha integration follows classical rules while the 10:9 weighting system provides a practical method for combining insights from both charts.
+### Classical Integration with Modern Application:
+This framework honors traditional Vedic principles while providing comprehensive tools for modern analysis. The triple chart integration follows classical rules while the 10:9:8 weighting system provides a practical method for combining insights from all three fundamental charts.
 
-Remember: Vedic astrology is ultimately about **understanding karmic patterns** and **making conscious choices** to align with cosmic rhythms for optimal life outcomes. The addition of navamsha analysis provides deeper insight into the **sustainability and underlying strength** of these karmic patterns.
+### Complete Life Assessment:
+- **D1 Analysis**: Current life circumstances and immediate potential
+- **D9 Analysis**: Underlying karmic support and sustainability
+- **D10 Analysis**: Career trajectory and public success potential
+- **Integrated Assessment**: Complete life picture with weighted priorities
+
+### The Deity Guidance System:
+The D10 deity rulership provides specific career guidance:
+- **Leadership paths** (Indra) for natural authority figures
+- **Financial careers** (Kubera) for wealth-building aptitudes
+- **Creative professions** (Brahma) for innovative and artistic souls
+- **Service roles** (Isan) for healing and counseling vocations
+
+### Final Wisdom:
+Remember: Vedic astrology is ultimately about **understanding karmic patterns** and **making conscious choices** to align with cosmic rhythms for optimal life outcomes. The addition of triple chart analysis (D1+D9+D10) provides the most complete insight into the **immediate potential, underlying strength, and career destiny** of these karmic patterns.
+
+This enhanced system allows for:
+- **Immediate decision-making** (D1 guidance)
+- **Long-term planning** (D9 sustainability)
+- **Career development** (D10 professional path)
+- **Complete life integration** (10:9:8 weighted synthesis)
 
 ---
 
-*This guide synthesizes classical principles from analyzed texts including B.V. Raman's works, Laghu Parashari, and Dasha-Aarambha teachings, enhanced with practical navamsha integration methods for complete astrological analysis.* 
+*This guide synthesizes classical principles from analyzed texts including B.V. Raman's works, Laghu Parashari, Dasha-Aarambha teachings, and Dr. K.S. Charak's Dashamsha research, enhanced with practical triple chart integration methods for complete astrological analysis.* 
