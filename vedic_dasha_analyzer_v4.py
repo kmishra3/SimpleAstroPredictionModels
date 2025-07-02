@@ -1,33 +1,36 @@
 #!/usr/bin/env python3
 """
-Enhanced Vedic Dasha Analyzer v3 with Multi-House System Support
-Supports 4 house systems: Lagna, Arudha Lagna, Chandra Lagna, and Mahadasha Lord Position
-Uses sideralib for sidereal ephemeris calculations instead of swisseph
+Enhanced Vedic Dasha Analyzer v4 with Navamsha (D9) Evaluation System
+Supports 4 house systems + Navamsha weighting: Lagna, Arudha Lagna, Chandra Lagna, and Mahadasha Lord Position
+Uses sideralib for sidereal ephemeris calculations with classical Navamsha analysis
 
 INSTALLATION REQUIREMENTS:
 Before running this script, install the required dependencies:
 
 pip install sideralib pandas pytz geopy timezonefinder markdown weasyprint
 
-This version uses sideralib instead of pyswisseph for planetary calculations.
-sideralib provides sidereal (Vedic) astrological calculations specifically designed
-for traditional Indian astrology systems.
+This version adds classical Navamsha (D9) evaluation with 10:9 weighting system.
+- D1 (Rashi) chart weight: 10/10 for immediate manifestation
+- D9 (Navamsha) chart weight: 9/10 for underlying strength and sustainability
+- Combined analysis provides more accurate predictions following classical Vedic principles
 
 USAGE:
   # Traditional analysis (Lagna only)
-  python vedic_dasha_analyzer_v3.py data/Technology/PLTR.json
+  python vedic_dasha_analyzer_v4.py data/Technology/PLTR.json
   
-  # All 4 house systems
-  python vedic_dasha_analyzer_v3.py data/Technology/PLTR.json --multi-house
+  # All 4 house systems with Navamsha evaluation
+  python vedic_dasha_analyzer_v4.py data/Technology/PLTR.json --multi-house --navamsha
   
-  # With custom location
-  python vedic_dasha_analyzer_v3.py data/Technology/PLTR.json --location "Mumbai, India" --multi-house
+  # With custom location and Navamsha
+  python vedic_dasha_analyzer_v4.py data/Technology/PLTR.json --location "Mumbai, India" --multi-house --navamsha
 
-CHANGES FROM v2:
-- Replaced pyswisseph with sideralib for better sidereal calculations
-- Simplified ephemeris setup (no need for Swiss Ephemeris data files)
-- Maintained all existing functionality and analysis methods
-- Better cross-platform compatibility
+CHANGES FROM v3:
+- Added complete Navamsha (D9) calculation system
+- Implemented 10:9 weighting between D1 and D9 charts
+- Enhanced analysis with D9 planetary strength evaluation
+- Vargottama detection (same sign in D1 and D9)
+- Classical Navamsha rules for marriage, spirituality, and life sustainability
+- Integrated D9 analysis into investment recommendations
 """
 
 import json
@@ -199,6 +202,29 @@ class EnhancedVedicDashaAnalyzer:
         self.dasha_sequence = ['Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury']
         self.dasha_years = {'Ketu': 7, 'Venus': 20, 'Sun': 6, 'Moon': 10, 'Mars': 7, 'Rahu': 18, 'Jupiter': 16, 'Saturn': 19, 'Mercury': 17}
 
+        # NEW: Navamsha (D9) calculation mappings
+        # Navamsha pattern for each elemental triplicity
+        self.navamsha_patterns = {
+            'fire': ['Aries', 'Leo', 'Sagittarius', 'Capricorn', 'Taurus', 'Virgo', 'Libra', 'Aquarius', 'Gemini'],
+            'earth': ['Capricorn', 'Taurus', 'Virgo', 'Libra', 'Aquarius', 'Gemini', 'Cancer', 'Scorpio', 'Pisces'],
+            'air': ['Libra', 'Aquarius', 'Gemini', 'Cancer', 'Scorpio', 'Pisces', 'Aries', 'Leo', 'Sagittarius'],
+            'water': ['Cancer', 'Scorpio', 'Pisces', 'Aries', 'Leo', 'Sagittarius', 'Capricorn', 'Taurus', 'Virgo']
+        }
+        
+        # Sign to element mapping
+        self.sign_elements = {
+            'Aries': 'fire', 'Leo': 'fire', 'Sagittarius': 'fire',
+            'Taurus': 'earth', 'Virgo': 'earth', 'Capricorn': 'earth',
+            'Gemini': 'air', 'Libra': 'air', 'Aquarius': 'air',
+            'Cancer': 'water', 'Scorpio': 'water', 'Pisces': 'water'
+        }
+        
+        # D1 vs D9 weighting system (classical Vedic principle)
+        self.chart_weights = {
+            'd1_weight': 10,  # Rashi chart - immediate manifestation
+            'd9_weight': 9    # Navamsha chart - underlying strength & sustainability
+        }
+
     # NEW: Multi-House System Core Methods
     
     def calculate_house_position(self, planet_longitude: float, reference_longitude: float) -> int:
@@ -361,6 +387,264 @@ class EnhancedVedicDashaAnalyzer:
         birth_mahadasha_lord = nakshatra_lords[nakshatra_number]
         
         return birth_mahadasha_lord
+
+    # NEW: NAVAMSHA (D9) CALCULATION METHODS
+    
+    def calculate_navamsha_position(self, planet_longitude: float) -> Dict[str, Any]:
+        """
+        Calculate navamsha position for a planet based on its longitude
+        
+        Args:
+            planet_longitude: Planet's longitude in degrees (0-360)
+        
+        Returns:
+            Dictionary with navamsha sign, degree, and pada information
+        """
+        # Normalize longitude to 0-360
+        longitude = planet_longitude % 360
+        
+        # Get the rashi (main sign) and degrees within sign
+        rashi_index = int(longitude // 30)
+        rashi_sign = self.signs[rashi_index]
+        degrees_in_sign = longitude % 30
+        
+        # Calculate navamsha number (1-9) within the sign
+        navamsha_number = int(degrees_in_sign / 3.333333333) + 1
+        navamsha_number = min(navamsha_number, 9)  # Ensure max is 9
+        
+        # Get the element of the rashi
+        element = self.sign_elements[rashi_sign]
+        
+        # Get navamsha sign from the pattern
+        navamsha_pattern = self.navamsha_patterns[element]
+        navamsha_sign = navamsha_pattern[navamsha_number - 1]
+        
+        # Calculate degrees within navamsha sign
+        navamsha_degree = (degrees_in_sign % 3.333333333) * 9  # Convert to 30-degree scale
+        
+        return {
+            'rashi_sign': rashi_sign,
+            'navamsha_sign': navamsha_sign,
+            'navamsha_number': navamsha_number,
+            'degrees_in_navamsha': navamsha_degree,
+            'is_vargottama': rashi_sign == navamsha_sign  # Same sign in D1 and D9
+        }
+    
+    def calculate_navamsha_chart(self, positions: Dict[str, Dict]) -> Dict[str, Dict]:
+        """
+        Calculate complete navamsha chart for all planets
+        
+        Args:
+            positions: Dictionary of planetary positions from D1 chart
+        
+        Returns:
+            Dictionary with navamsha positions for all planets
+        """
+        navamsha_chart = {}
+        
+        for planet, planet_data in positions.items():
+            if planet == 'Ascendant':
+                # Calculate navamsha lagna
+                asc_longitude = planet_data.get('longitude', 0)
+                nav_data = self.calculate_navamsha_position(asc_longitude)
+                navamsha_chart['Navamsha_Lagna'] = {
+                    'longitude': nav_data['degrees_in_navamsha'],
+                    'zodiacSign': nav_data['navamsha_sign'],
+                    'degreeWithinSign': nav_data['degrees_in_navamsha'],
+                    'is_vargottama': nav_data['is_vargottama'],
+                    'navamsha_number': nav_data['navamsha_number']
+                }
+            else:
+                # Calculate navamsha position for planet
+                planet_longitude = planet_data.get('longitude', 0)
+                nav_data = self.calculate_navamsha_position(planet_longitude)
+                
+                navamsha_chart[planet] = {
+                    'longitude': nav_data['degrees_in_navamsha'],
+                    'zodiacSign': nav_data['navamsha_sign'],
+                    'degreeWithinSign': nav_data['degrees_in_navamsha'],
+                    'is_vargottama': nav_data['is_vargottama'],
+                    'navamsha_number': nav_data['navamsha_number'],
+                    'rashi_sign': nav_data['rashi_sign']
+                }
+        
+        return navamsha_chart
+    
+    def evaluate_with_navamsha_weight(self, d1_score: float, d9_score: float, 
+                                    d1_rating: str = None, d9_rating: str = None) -> Dict[str, Any]:
+        """
+        Apply 10:9 weighting system between D1 (Rashi) and D9 (Navamsha) charts
+        
+        Args:
+            d1_score: Score from D1 analysis (0-10)
+            d9_score: Score from D9 analysis (0-10)
+            d1_rating: Optional categorical rating from D1
+            d9_rating: Optional categorical rating from D9
+        
+        Returns:
+            Combined analysis with weighted scores and final recommendation
+        """
+        # Apply classical weighting: D1 = 10/10, D9 = 9/10
+        d1_weighted = d1_score * (self.chart_weights['d1_weight'] / 10.0)
+        d9_weighted = d9_score * (self.chart_weights['d9_weight'] / 10.0)
+        
+        # Calculate combined score
+        total_possible = self.chart_weights['d1_weight'] + self.chart_weights['d9_weight']
+        combined_score = (d1_weighted + d9_weighted) / total_possible * 10
+        
+        # Determine final rating based on combined score
+        if combined_score >= 8.5:
+            final_rating = "Strong Buy"
+        elif combined_score >= 7.0:
+            final_rating = "Buy"
+        elif combined_score >= 5.5:
+            final_rating = "Hold"
+        elif combined_score >= 3.0:
+            final_rating = "Sell" 
+        else:
+            final_rating = "Strong Sell"
+        
+        # Classical interpretation
+        interpretation = self._get_navamsha_interpretation(d1_score, d9_score, d1_rating, d9_rating)
+        
+        return {
+            'd1_score': d1_score,
+            'd9_score': d9_score,
+            'd1_weighted': d1_weighted,
+            'd9_weighted': d9_weighted,
+            'combined_score': combined_score,
+            'd1_rating': d1_rating,
+            'd9_rating': d9_rating,
+            'final_rating': final_rating,
+            'interpretation': interpretation,
+            'weight_explanation': f"D1 (Rashi) weight: {self.chart_weights['d1_weight']}/10, D9 (Navamsha) weight: {self.chart_weights['d9_weight']}/10"
+        }
+    
+    def _get_navamsha_interpretation(self, d1_score: float, d9_score: float, 
+                                   d1_rating: str, d9_rating: str) -> str:
+        """Generate classical Vedic interpretation of D1 vs D9 combination"""
+        
+        interpretations = []
+        
+        # Score-based analysis
+        if d1_score > d9_score + 2:
+            interpretations.append("Strong immediate prospects but underlying foundation needs attention")
+        elif d9_score > d1_score + 2:
+            interpretations.append("Excellent long-term potential despite current challenges")
+        elif abs(d1_score - d9_score) <= 1:
+            interpretations.append("Balanced outlook with aligned immediate and long-term prospects")
+        
+        # Rating-based analysis
+        if d1_rating and d9_rating:
+            if d1_rating in ["Strong Buy", "Buy"] and d9_rating in ["Sell", "Strong Sell"]:
+                interpretations.append("Caution: Strong surface indicators undermined by weak fundamentals")
+            elif d1_rating in ["Sell", "Strong Sell"] and d9_rating in ["Buy", "Strong Buy"]:
+                interpretations.append("Hidden opportunity: Poor surface conditions but strong underlying potential")
+            elif d1_rating == "Strong Buy" and d9_rating == "Hold":
+                interpretations.append("Good opportunity with moderate sustainability - proceed with measured optimism")
+        
+        return "; ".join(interpretations) if interpretations else "Standard combined analysis applies"
+    
+    def _analyze_dasha_in_navamsha(self, dasha_lord: str, navamsha_chart: Dict, 
+                                 birth_positions: Dict) -> Dict[str, Any]:
+        """
+        Analyze dasha lord's strength in navamsha chart
+        
+        Args:
+            dasha_lord: Planet whose dasha is being analyzed
+            navamsha_chart: Complete D9 chart
+            birth_positions: D1 chart positions
+            
+        Returns:
+            Analysis of dasha lord in navamsha with auspiciousness score
+        """
+        if dasha_lord not in navamsha_chart:
+            return {
+                'd9_auspiciousness': 5.0,
+                'd9_analysis': 'Dasha lord not found in navamsha chart',
+                'is_vargottama': False,
+                'd9_sign': 'Unknown'
+            }
+        
+        d9_planet_data = navamsha_chart[dasha_lord]
+        d9_sign = d9_planet_data['zodiacSign']
+        is_vargottama = d9_planet_data['is_vargottama']
+        
+        # Calculate strength in D9
+        d9_strength_result = self.calculate_planetary_strength(
+            dasha_lord, d9_sign, is_dasha_start=True
+        )
+        d9_strength = d9_strength_result['strength_10']
+        
+        # Vargottama bonus (classical rule)
+        if is_vargottama:
+            d9_strength *= 1.25  # 25% bonus for vargottama
+            d9_strength = min(d9_strength, 10.0)
+        
+        # Additional D9 specific analysis
+        d9_analysis_notes = []
+        
+        if is_vargottama:
+            d9_analysis_notes.append(f"{dasha_lord} is Vargottama (same sign in D1 and D9) - excellent strength")
+        
+        if d9_sign == self.exaltation_signs.get(dasha_lord):
+            d9_analysis_notes.append(f"{dasha_lord} exalted in D9 - strong underlying support")
+        elif d9_sign in self.own_signs.get(dasha_lord, []):
+            d9_analysis_notes.append(f"{dasha_lord} in own sign in D9 - stable foundation")
+        elif d9_sign == self.debilitation_signs.get(dasha_lord):
+            d9_analysis_notes.append(f"{dasha_lord} debilitated in D9 - underlying weakness")
+        
+        # Convert D9 strength to auspiciousness score
+        d9_auspiciousness = d9_strength
+        
+        return {
+            'd9_auspiciousness': d9_auspiciousness,
+            'd9_strength': d9_strength,
+            'd9_sign': d9_sign,
+            'is_vargottama': is_vargottama,
+            'd9_analysis': "; ".join(d9_analysis_notes) if d9_analysis_notes else f"{dasha_lord} in {d9_sign} in D9",
+            'd9_dignity': d9_strength_result['dignity_type']
+        }
+    
+    def _score_to_rating(self, score: float) -> str:
+        """Convert numerical score to categorical rating"""
+        if score >= 8.5:
+            return "Strong Buy"
+        elif score >= 7.0:
+            return "Buy"
+        elif score >= 5.5:
+            return "Hold"
+        elif score >= 3.0:
+            return "Sell"
+        else:
+            return "Strong Sell"
+    
+    def _get_navamsha_effect_description(self, combined_analysis: Dict[str, Any]) -> str:
+        """Generate concise navamsha effect description for CSV"""
+        if not combined_analysis:
+            return "No D9 Analysis"
+        
+        d1_score = combined_analysis.get('d1_score', 0)
+        d9_score = combined_analysis.get('d9_score', 0)
+        final_rating = combined_analysis.get('final_rating', 'Hold')
+        
+        # Determine effect type
+        score_diff = d9_score - d1_score
+        
+        if abs(score_diff) <= 1.0:
+            effect_type = "Balanced"
+        elif score_diff > 1.0:
+            effect_type = "Strengthening"
+        else:
+            effect_type = "Weakening"
+        
+        # Create concise description
+        if effect_type == "Strengthening":
+            return f"D9 Strengthens (+{score_diff:.1f}) → {final_rating}"
+        elif effect_type == "Weakening":
+            return f"D9 Weakens ({score_diff:.1f}) → {final_rating}"
+        else:
+            return f"D9 Balanced (±{abs(score_diff):.1f}) → {final_rating}"
 
     def get_reference_longitude(self, house_system: str, positions: Dict, 
                               birth_mahadasha_lord: str = None) -> float:
@@ -776,7 +1060,6 @@ class EnhancedVedicDashaAnalyzer:
                 if dasha_dt_local <= entity_birth_dt_local:
                     use_birth_positions_for_aarambha = True
                     aarambha_positions = birth_positions  # Use the birth positions directly
-                    print(f"   🎯 Dasha-aarambha correction: Using birth-time positions for {dasha_planet} (dasha active at birth)")
                 else:
                     # Dasha starts after birth, use actual dasha start positions
                     aarambha_positions = self.get_planetary_positions(dasha_dt_local)
@@ -894,7 +1177,8 @@ class EnhancedVedicDashaAnalyzer:
             
         return birth_date, birth_time
 
-    def analyze_json_file(self, json_file_path: str, enable_multi_house: bool = False) -> Dict[str, Any]:
+    def analyze_json_file(self, json_file_path: str, enable_multi_house: bool = False, 
+                         enable_navamsha: bool = False) -> Dict[str, Any]:
         """Enhanced analysis with multi-house system support using subfolder organization"""
         
         with open(json_file_path, 'r') as f:
@@ -936,7 +1220,7 @@ class EnhancedVedicDashaAnalyzer:
                     
                     # Run standard v2 analysis with adjusted house calculations
                     system_results = self.run_single_house_system_analysis(
-                        data, birth_positions.copy(), ref_longitude, system_key, system_name
+                        data, birth_positions.copy(), ref_longitude, system_key, system_name, enable_navamsha
                     )
                     
                     # Save results using standard v2 format in system subfolder
@@ -977,7 +1261,7 @@ class EnhancedVedicDashaAnalyzer:
             os.makedirs(output_dir, exist_ok=True)
             
             results = self.run_single_house_system_analysis(
-                data, birth_positions, ref_longitude, 'lagna', 'Lagna (Ascendant)'
+                data, birth_positions, ref_longitude, 'lagna', 'Lagna (Ascendant)', enable_navamsha
             )
             
             self.save_system_results(results, output_dir, symbol, 'Lagna (Ascendant)')
@@ -995,7 +1279,7 @@ class EnhancedVedicDashaAnalyzer:
 
     def run_single_house_system_analysis(self, data: Dict, birth_positions: Dict, 
                                        ref_longitude: float, system_key: str, 
-                                       system_name: str) -> Dict[str, Any]:
+                                       system_name: str, enable_navamsha: bool = False) -> Dict[str, Any]:
         """Run standard v2 analysis with specified reference longitude for house calculations"""
         
         # Temporarily store original ascendant
@@ -1012,6 +1296,12 @@ class EnhancedVedicDashaAnalyzer:
             # Extract birth information
             birth_date, birth_time = self.extract_birth_info(data)
             
+            # NEW: Calculate navamsha chart if enabled
+            navamsha_chart = None
+            if enable_navamsha:
+                print(f"    Calculating Navamsha (D9) chart...")
+                navamsha_chart = self.calculate_navamsha_chart(birth_positions)
+            
             # Process dasha data
             results = []
             
@@ -1022,6 +1312,36 @@ class EnhancedVedicDashaAnalyzer:
                     birth_positions, start_date, maha_dasha['lord'], 'Maha Dasha', birth_time, birth_date
                 )
                 
+                # NEW: Navamsha analysis if enabled
+                final_auspiciousness = analysis['auspiciousness_score']
+                navamsha_data = {}
+                
+                if enable_navamsha and navamsha_chart:
+                    d9_analysis = self._analyze_dasha_in_navamsha(
+                        maha_dasha['lord'], navamsha_chart, birth_positions
+                    )
+                    
+                    combined_analysis = self.evaluate_with_navamsha_weight(
+                        d1_score=analysis['auspiciousness_score'],
+                        d9_score=d9_analysis['d9_auspiciousness'],
+                        d1_rating=self._score_to_rating(analysis['auspiciousness_score']),
+                        d9_rating=self._score_to_rating(d9_analysis['d9_auspiciousness'])
+                    )
+                    
+                    final_auspiciousness = combined_analysis['combined_score']
+                    navamsha_data = {
+                        'd1_auspiciousness': analysis['auspiciousness_score'],
+                        'd9_auspiciousness': d9_analysis['d9_auspiciousness'],
+                        'navamsha_analysis': d9_analysis,
+                        'combined_analysis': combined_analysis,
+                        # CSV-friendly column names
+                        'D1_Score': round(analysis['auspiciousness_score'], 2),
+                        'D9_Score': round(d9_analysis['d9_auspiciousness'], 2),
+                        'D9_Sign': d9_analysis['d9_sign'],
+                        'Vargottama': 'Yes' if d9_analysis['is_vargottama'] else 'No',
+                        'Navamsha_Effect': self._get_navamsha_effect_description(combined_analysis)
+                    }
+                
                 period_data = {
                     'start_date': start_date,
                     'end_date': maha_dasha['endDate'],
@@ -1031,14 +1351,15 @@ class EnhancedVedicDashaAnalyzer:
                     'Type': 'MD',
                     'Planet': maha_dasha['lord'],
                     'Parent_Planet': '',
-                    'auspiciousness_score': analysis['auspiciousness_score'],
+                    'auspiciousness_score': final_auspiciousness,
                     'dasha_lord_strength': analysis.get('dasha_lord_strength', 5.0),
                     'protections_count': len(analysis.get('arishta_bhanga', {}).get('protections', [])),
                     'is_protected': analysis.get('arishta_bhanga', {}).get('is_protected', False),
                     'sun_strength': analysis.get('sun_moon_analysis', {}).get('sun_preparation', {}).get('strength', 0.0),
                     'moon_strength': analysis.get('sun_moon_analysis', {}).get('moon_nourishment', {}).get('strength', 0.0),
                     'luminaries_support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
-                    'sun_moon_support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
+                    'sun_moon_support': analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
+                    **navamsha_data  # Add navamsha data if available
                 }
                 
                 # Add detailed astrological significance
@@ -1068,6 +1389,36 @@ class EnhancedVedicDashaAnalyzer:
                     0.3 * ad_analysis.get('dasha_lord_strength', 5.0)
                 )
                 
+                # NEW: Navamsha analysis if enabled (analyze MD lord for primary influence)
+                final_auspiciousness = round(composite_score, 2)
+                navamsha_data = {}
+                
+                if enable_navamsha and navamsha_chart:
+                    d9_analysis = self._analyze_dasha_in_navamsha(
+                        bhukti['parentLord'], navamsha_chart, birth_positions
+                    )
+                    
+                    combined_analysis = self.evaluate_with_navamsha_weight(
+                        d1_score=composite_score,
+                        d9_score=d9_analysis['d9_auspiciousness'],
+                        d1_rating=self._score_to_rating(composite_score),
+                        d9_rating=self._score_to_rating(d9_analysis['d9_auspiciousness'])
+                    )
+                    
+                    final_auspiciousness = round(combined_analysis['combined_score'], 2)
+                    navamsha_data = {
+                        'd1_auspiciousness': composite_score,
+                        'd9_auspiciousness': d9_analysis['d9_auspiciousness'],
+                        'navamsha_analysis': d9_analysis,
+                        'combined_analysis': combined_analysis,
+                        # CSV-friendly column names
+                        'D1_Score': round(composite_score, 2),
+                        'D9_Score': round(d9_analysis['d9_auspiciousness'], 2),
+                        'D9_Sign': d9_analysis['d9_sign'],
+                        'Vargottama': 'Yes' if d9_analysis['is_vargottama'] else 'No',
+                        'Navamsha_Effect': self._get_navamsha_effect_description(combined_analysis)
+                    }
+                
                 period_data = {
                     'start_date': start_date,
                     'end_date': bhukti['endDate'],
@@ -1077,14 +1428,15 @@ class EnhancedVedicDashaAnalyzer:
                     'Type': 'MD-AD',
                     'Planet': bhukti['lord'],
                     'Parent_Planet': bhukti['parentLord'],
-                    'auspiciousness_score': round(composite_score, 2),
+                    'auspiciousness_score': final_auspiciousness,
                     'dasha_lord_strength': round(composite_strength, 2),
                     'protections_count': len(ad_analysis.get('arishta_bhanga', {}).get('protections', [])),
                     'is_protected': ad_analysis.get('arishta_bhanga', {}).get('is_protected', False),
                     'sun_strength': ad_analysis.get('sun_moon_analysis', {}).get('sun_preparation', {}).get('strength', 0.0),
                     'moon_strength': ad_analysis.get('sun_moon_analysis', {}).get('moon_nourishment', {}).get('strength', 0.0),
                     'luminaries_support': ad_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
-                    'sun_moon_support': ad_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
+                    'sun_moon_support': ad_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
+                    **navamsha_data  # Add navamsha data if available
                 }
                 
                 # Add detailed astrological significance
@@ -1126,6 +1478,36 @@ class EnhancedVedicDashaAnalyzer:
                         0.2 * pd_analysis.get('dasha_lord_strength', 5.0)
                     )
                     
+                    # NEW: Navamsha analysis if enabled (analyze MD lord for primary influence)
+                    final_auspiciousness = round(composite_score, 2)
+                    navamsha_data = {}
+                    
+                    if enable_navamsha and navamsha_chart:
+                        d9_analysis = self._analyze_dasha_in_navamsha(
+                            maha_lord, navamsha_chart, birth_positions
+                        )
+                        
+                        combined_analysis = self.evaluate_with_navamsha_weight(
+                            d1_score=composite_score,
+                            d9_score=d9_analysis['d9_auspiciousness'],
+                            d1_rating=self._score_to_rating(composite_score),
+                            d9_rating=self._score_to_rating(d9_analysis['d9_auspiciousness'])
+                        )
+                        
+                        final_auspiciousness = round(combined_analysis['combined_score'], 2)
+                        navamsha_data = {
+                            'd1_auspiciousness': composite_score,
+                            'd9_auspiciousness': d9_analysis['d9_auspiciousness'],
+                            'navamsha_analysis': d9_analysis,
+                            'combined_analysis': combined_analysis,
+                            # CSV-friendly column names
+                            'D1_Score': round(composite_score, 2),
+                            'D9_Score': round(d9_analysis['d9_auspiciousness'], 2),
+                            'D9_Sign': d9_analysis['d9_sign'],
+                            'Vargottama': 'Yes' if d9_analysis['is_vargottama'] else 'No',
+                            'Navamsha_Effect': self._get_navamsha_effect_description(combined_analysis)
+                        }
+                    
                     period_data = {
                         'start_date': start_date,
                         'end_date': pratyantar['endDate'],
@@ -1135,14 +1517,15 @@ class EnhancedVedicDashaAnalyzer:
                         'Type': 'MD-AD-PD',
                         'Planet': pratyantar['lord'],
                         'Parent_Planet': antar_lord,
-                        'auspiciousness_score': round(composite_score, 2),
+                        'auspiciousness_score': final_auspiciousness,
                         'dasha_lord_strength': round(composite_strength, 2),
                         'protections_count': len(pd_analysis.get('arishta_bhanga', {}).get('protections', [])),
                         'is_protected': pd_analysis.get('arishta_bhanga', {}).get('is_protected', False),
                         'sun_strength': pd_analysis.get('sun_moon_analysis', {}).get('sun_preparation', {}).get('strength', 0.0),
                         'moon_strength': pd_analysis.get('sun_moon_analysis', {}).get('moon_nourishment', {}).get('strength', 0.0),
                         'luminaries_support': pd_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
-                        'sun_moon_support': pd_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5)
+                        'sun_moon_support': pd_analysis.get('sun_moon_analysis', {}).get('luminaries_support', 0.5),
+                        **navamsha_data  # Add navamsha data if available
                     }
                     
                     # Add detailed astrological significance
@@ -1257,7 +1640,113 @@ class EnhancedVedicDashaAnalyzer:
             pratyantar_nature = "benefic" if pratyantardasha_lord in self.natural_benefics else "malefic"
             significance_parts.append(f"{pratyantardasha_lord} sub-sub-period ({pratyantar_nature})")
         
+        # 5. NEW: Navamsha (D9) Analysis
+        if 'navamsha_analysis' in period and 'combined_analysis' in period:
+            navamsha_details = self._generate_navamsha_significance(period)
+            if navamsha_details:
+                significance_parts.append(navamsha_details)
+        
         return "; ".join(significance_parts)
+    
+    def _generate_navamsha_significance(self, period: Dict[str, Any]) -> str:
+        """Generate navamsha-specific astrological significance"""
+        navamsha_analysis = period.get('navamsha_analysis', {})
+        combined_analysis = period.get('combined_analysis', {})
+        
+        if not navamsha_analysis or not combined_analysis:
+            return ""
+        
+        significance_parts = []
+        
+        # D9 sign and strength
+        d9_sign = navamsha_analysis.get('d9_sign', 'Unknown')
+        d9_strength = navamsha_analysis.get('d9_strength', 0)
+        is_vargottama = navamsha_analysis.get('is_vargottama', False)
+        
+        # Vargottama status (most important)
+        if is_vargottama:
+            significance_parts.append("Vargottama (same sign D1-D9) - exceptional strength")
+        
+        # D9 dignity assessment
+        dasha_lord = period.get('mahadasha_lord', '')
+        if dasha_lord and d9_sign:
+            if d9_sign == self.exaltation_signs.get(dasha_lord):
+                significance_parts.append(f"D9 exalted in {d9_sign}")
+            elif d9_sign in self.own_signs.get(dasha_lord, []):
+                significance_parts.append(f"D9 own sign {d9_sign}")
+            elif d9_sign == self.debilitation_signs.get(dasha_lord):
+                significance_parts.append(f"D9 debilitated in {d9_sign}")
+            else:
+                significance_parts.append(f"D9 in {d9_sign}")
+        
+        # Combined effect interpretation
+        d1_score = combined_analysis.get('d1_score', 0)
+        d9_score = combined_analysis.get('d9_score', 0)
+        interpretation = combined_analysis.get('interpretation', '')
+        
+        score_diff = d9_score - d1_score
+        if abs(score_diff) > 1.5:
+            if score_diff > 0:
+                significance_parts.append("D9 significantly strengthens long-term prospects")
+            else:
+                significance_parts.append("D9 indicates underlying challenges")
+        
+        # Add key interpretation if meaningful
+        if interpretation and "opportunity" in interpretation.lower():
+            significance_parts.append("D9 reveals hidden potential")
+        elif interpretation and "caution" in interpretation.lower():
+            significance_parts.append("D9 suggests foundational weakness")
+        
+        return "; ".join(significance_parts) if significance_parts else ""
+    
+    def _get_navamsha_opportunity_analysis(self, opportunity: Dict[str, Any], df: pd.DataFrame) -> str:
+        """Extract navamsha analysis for investment opportunity"""
+        try:
+            # Find the period in dataframe matching this opportunity
+            current_date = opportunity['current_date']
+            matching_periods = df[df['start_date'] == current_date]
+            
+            if matching_periods.empty:
+                return "No D9 data"
+            
+            period = matching_periods.iloc[0]
+            
+            # Extract navamsha information if available
+            navamsha_parts = []
+            
+            # D9 score and effect
+            if 'D9_Score' in period and pd.notna(period['D9_Score']):
+                d9_score = period['D9_Score']
+                d1_score = period.get('D1_Score', period.get('auspiciousness_score', 0))
+                
+                score_diff = d9_score - d1_score
+                if score_diff > 1.0:
+                    navamsha_parts.append(f"D9 strengthens (+{score_diff:.1f})")
+                elif score_diff < -1.0:
+                    navamsha_parts.append(f"D9 weakens ({score_diff:.1f})")
+                else:
+                    navamsha_parts.append(f"D9 balanced ({score_diff:+.1f})")
+            
+            # Vargottama status
+            if 'Vargottama' in period and period['Vargottama'] == 'Yes':
+                navamsha_parts.append("Vargottama")
+            
+            # D9 sign
+            if 'D9_Sign' in period and pd.notna(period['D9_Sign']):
+                navamsha_parts.append(f"D9 in {period['D9_Sign']}")
+            
+            # Navamsha effect description
+            if 'Navamsha_Effect' in period and pd.notna(period['Navamsha_Effect']):
+                effect = str(period['Navamsha_Effect'])
+                if "Strengthens" in effect:
+                    navamsha_parts.append("Long-term strength")
+                elif "Weakens" in effect:
+                    navamsha_parts.append("Underlying weakness")
+            
+            return "; ".join(navamsha_parts) if navamsha_parts else "Standard D9"
+            
+        except Exception as e:
+            return "D9 analysis error"
 
     def find_active_lord(self, target_date: str, periods: Dict) -> Optional[str]:
         """Find the active dasha lord for a given date"""
@@ -1303,11 +1792,22 @@ class EnhancedVedicDashaAnalyzer:
         complete_file = os.path.join(output_dir, f"{symbol}_Enhanced_Dasha_Analysis.csv")
         
         # Select required columns in correct order for CSV
-        required_columns = [
-            'Date', 'End_Date', 'Type', 'mahadasha_lord', 'antardasha_lord', 'pratyantardasha_lord',
-            'Planet', 'Parent_Planet', 'Auspiciousness_Score', 'Dasha_Lord_Strength', 
-            'Arishta_Protections', 'Protection_Score', 'Sun_Moon_Support', 'Astrological_Significance'
-        ]
+        # Check if navamsha columns exist (only when navamsha analysis is enabled)
+        has_navamsha = any(col in df_csv.columns for col in ['d1_auspiciousness', 'd9_auspiciousness', 'combined_analysis'])
+        
+        if has_navamsha:
+            required_columns = [
+                'Date', 'End_Date', 'Type', 'mahadasha_lord', 'antardasha_lord', 'pratyantardasha_lord',
+                'Planet', 'Parent_Planet', 'Auspiciousness_Score', 'Dasha_Lord_Strength', 
+                'Arishta_Protections', 'Protection_Score', 'Sun_Moon_Support', 
+                'D1_Score', 'D9_Score', 'Navamsha_Effect', 'D9_Sign', 'Vargottama', 'Astrological_Significance'
+            ]
+        else:
+            required_columns = [
+                'Date', 'End_Date', 'Type', 'mahadasha_lord', 'antardasha_lord', 'pratyantardasha_lord',
+                'Planet', 'Parent_Planet', 'Auspiciousness_Score', 'Dasha_Lord_Strength', 
+                'Arishta_Protections', 'Protection_Score', 'Sun_Moon_Support', 'Astrological_Significance'
+            ]
         
         # Create output dataframe with only required columns
         output_df = df_csv[required_columns].copy()
@@ -1383,6 +1883,17 @@ class EnhancedVedicDashaAnalyzer:
         protection_rate = (protected_periods / total_periods * 100) if total_periods > 0 else 0
         perfect_scores = len(df[df['auspiciousness_score'] >= 9.5])
         
+        # Check for navamsha analysis
+        has_navamsha = any(col in df.columns for col in ['d1_auspiciousness', 'd9_auspiciousness', 'D1_Score', 'D9_Score'])
+        navamsha_stats = ""
+        if has_navamsha:
+            vargottama_periods = len(df[df.get('Vargottama', df.get('vargottama', pd.Series(['No']))).str.contains('Yes', na=False)])
+            strengthening_periods = len(df[df.get('Navamsha_Effect', df.get('navamsha_effect', pd.Series(['']))).str.contains('Strengthens', na=False)])
+            navamsha_stats = f"""
+- **Navamsha Analysis:** ✅ Enabled (D1:D9 = 10:9 weighting)
+- **Vargottama Periods:** {vargottama_periods} ({vargottama_periods/total_periods*100:.1f}% exceptional strength)
+- **D9 Strengthening:** {strengthening_periods} periods show enhanced long-term potential"""
+        
         # High protection periods (triple protection, sorted by date)
         protection_col = 'protections_count' if 'protections_count' in df.columns else 'Arishta_Protections'
         high_protection = df[df[protection_col] >= 3].copy().sort_values('start_date')
@@ -1437,7 +1948,7 @@ class EnhancedVedicDashaAnalyzer:
 - **Total Periods Analyzed:** {total_periods:,}
 - **Protection Rate:** {protection_rate:.1f}% ({protected_periods}/{total_periods} periods)
 - **Perfect Scores (≥9.5):** {perfect_scores}
-- **Analysis Depth:** 3-level (Maha + Antar + Pratyantar Dashas)
+- **Analysis Depth:** 3-level (Maha + Antar + Pratyantar Dashas){navamsha_stats}
 {house_system_context}
 
 ### Chart Assessment
@@ -1460,8 +1971,8 @@ class EnhancedVedicDashaAnalyzer:
 
 **Investment Thesis:** Buy during low-scoring periods when high-scoring periods are imminent. These opportunities offer maximum upside potential by entering before favorable planetary influences drive stock appreciation.
 
-| Date Range | MD-AD-PD Combination | Current Score | Next Score | Change | Action | Selection Criteria | Astrological Significance | Confidence |
-|------------|---------------------|---------------|------------|--------|--------|-------------------|---------------------------|------------|"""
+| Date Range | MD-AD-PD Combination | Current Score | Next Score | Change | Action | Selection Criteria | Astrological Significance | {"Navamsha Analysis |" if has_navamsha else ""} Confidence |
+|------------|---------------------|---------------|------------|--------|--------|-------------------|---------------------------|{"------------------|" if has_navamsha else ""}------------|"""
 
         # Top buy opportunities
         for opp in transition_opportunities['buy_opportunities'][:10]:
@@ -1469,7 +1980,13 @@ class EnhancedVedicDashaAnalyzer:
             year = opp['current_date'][:4]
             status = "🟢 **NOW**" if int(year) == current_year else "🔵 FUTURE" if int(year) > current_year else "🟡 PAST"
             
-            markdown_content += f"\n| {date_range} | {opp['md_ad_pd_combo']} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | +{opp['score_change']:.1f} | **{opp['action']}** | {opp['selection_rationale']} | {opp['astrological_significance']} | {opp['confidence']} {status} |"
+            # Add navamsha analysis if available
+            navamsha_cell = ""
+            if has_navamsha:
+                navamsha_info = self._get_navamsha_opportunity_analysis(opp, df)
+                navamsha_cell = f" | {navamsha_info}"
+            
+            markdown_content += f"\n| {date_range} | {opp['md_ad_pd_combo']} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | +{opp['score_change']:.1f} | **{opp['action']}** | {opp['selection_rationale']} | {opp['astrological_significance']}{navamsha_cell} | {opp['confidence']} {status} |"
 
         markdown_content += f"""
 
@@ -1477,8 +1994,8 @@ class EnhancedVedicDashaAnalyzer:
 
 **Exit Thesis:** Sell during high-scoring periods when low-scoring periods are approaching. These opportunities protect gains by exiting before challenging planetary influences pressure stock prices.
 
-| Date Range | MD-AD-PD Combination | Current Score | Next Score | Change | Action | Selection Criteria | Astrological Significance | Confidence |
-|------------|---------------------|---------------|------------|--------|--------|-------------------|---------------------------|------------|"""
+| Date Range | MD-AD-PD Combination | Current Score | Next Score | Change | Action | Selection Criteria | Astrological Significance | {"Navamsha Analysis |" if has_navamsha else ""} Confidence |
+|------------|---------------------|---------------|------------|--------|--------|-------------------|---------------------------|{"------------------|" if has_navamsha else ""}------------|"""
 
         # Top sell opportunities  
         for opp in transition_opportunities['sell_opportunities'][:10]:
@@ -1486,7 +2003,13 @@ class EnhancedVedicDashaAnalyzer:
             year = opp['current_date'][:4]
             status = "⚠️ **NOW**" if int(year) == current_year else "📅 FUTURE" if int(year) > current_year else "📊 PAST"
             
-            markdown_content += f"\n| {date_range} | {opp['md_ad_pd_combo']} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | {opp['score_change']:.1f} | **{opp['action']}** | {opp['selection_rationale']} | {opp['astrological_significance']} | {opp['confidence']} {status} |"
+            # Add navamsha analysis if available
+            navamsha_cell = ""
+            if has_navamsha:
+                navamsha_info = self._get_navamsha_opportunity_analysis(opp, df)
+                navamsha_cell = f" | {navamsha_info}"
+            
+            markdown_content += f"\n| {date_range} | {opp['md_ad_pd_combo']} | {opp['current_score']:.1f} | {opp['next_score']:.1f} | {opp['score_change']:.1f} | **{opp['action']}** | {opp['selection_rationale']} | {opp['astrological_significance']}{navamsha_cell} | {opp['confidence']} {status} |"
 
         # Near-term transition analysis
         near_term_transitions = self.analyze_investment_transitions(current_periods)
@@ -2145,21 +2668,24 @@ class EnhancedVedicDashaAnalyzer:
 def main():
     """Main execution function with command-line argument parsing"""
     parser = argparse.ArgumentParser(
-        description='Enhanced Vedic Dasha Analyzer v3 with Multi-House System Support',
+        description='Enhanced Vedic Dasha Analyzer v4 with Navamsha (D9) Evaluation System',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   # Traditional analysis (Lagna only)
-  python vedic_dasha_analyzer_v3.py data/Technology/PLTR.json
+  python vedic_dasha_analyzer_v4.py data/Technology/PLTR.json
   
-  # All 4 house systems
-  python vedic_dasha_analyzer_v3.py data/Technology/PLTR.json --multi-house
+  # All 4 house systems with Navamsha evaluation
+  python vedic_dasha_analyzer_v4.py data/Technology/PLTR.json --multi-house --navamsha
   
-  # Specific house systems
-  python vedic_dasha_analyzer_v3.py data/Technology/PLTR.json --house-systems lagna arudha_lagna
+  # Specific house systems with Navamsha
+  python vedic_dasha_analyzer_v4.py data/Technology/PLTR.json --house-systems lagna arudha_lagna --navamsha
   
-  # With custom location
-  python vedic_dasha_analyzer_v3.py data/Technology/PLTR.json --location "Mumbai, India" --multi-house
+  # With custom location and Navamsha
+  python vedic_dasha_analyzer_v4.py data/Technology/PLTR.json --location "Mumbai, India" --multi-house --navamsha
+  
+  # Navamsha only (single house system)
+  python vedic_dasha_analyzer_v4.py data/Technology/PLTR.json --navamsha
         """
     )
     
@@ -2171,6 +2697,8 @@ Examples:
     parser.add_argument('--house-systems', nargs='+', 
                        choices=['lagna', 'arudha_lagna', 'chandra_lagna', 'mahadasha_lord'],
                        help='Specify which house systems to analyze')
+    parser.add_argument('--navamsha', action='store_true',
+                       help='Enable Navamsha (D9) evaluation with 10:9 weighting system')
     parser.add_argument('--output', '-o', help='Custom output directory (default: analysis/{SYMBOL}/)')
     
     args = parser.parse_args()
@@ -2181,7 +2709,7 @@ Examples:
         sys.exit(1)
     
     print("=" * 80)
-    print("🏛️  VEDIC DASHA ANALYZER v3 - MULTI-HOUSE SYSTEM EDITION")
+    print("🏛️  VEDIC DASHA ANALYZER v4 - NAVAMSHA EVALUATION EDITION")
     print("=" * 80)
     
     # Determine house systems to analyze
@@ -2198,6 +2726,14 @@ Examples:
         selected_systems = ['lagna']
         print("📍 Traditional analysis: Lagna system only")
     
+    # Show navamsha status
+    if args.navamsha:
+        print("🔢 Navamsha (D9) evaluation enabled - 10:9 weighting with D1 chart")
+        print("   📊 D1 (Rashi) weight: 10/10 for immediate manifestation")
+        print("   🌟 D9 (Navamsha) weight: 9/10 for underlying strength & sustainability")
+    else:
+        print("📈 Using D1 (Rashi) chart only - add --navamsha for enhanced analysis")
+    
     try:
         # Initialize analyzer
         analyzer = EnhancedVedicDashaAnalyzer(birth_location=args.location)
@@ -2205,13 +2741,13 @@ Examples:
         # Filter house systems based on selection
         if len(selected_systems) == 1 and selected_systems[0] == 'lagna':
             # Standard single-system mode
-            results = analyzer.analyze_json_file(args.json_file, enable_multi_house=False)
+            results = analyzer.analyze_json_file(args.json_file, enable_multi_house=False, enable_navamsha=args.navamsha)
         else:
             # Multi-system mode - temporarily adjust house_systems
             original_systems = analyzer.house_systems.copy()
             analyzer.house_systems = {k: v for k, v in original_systems.items() if k in selected_systems}
             
-            results = analyzer.analyze_json_file(args.json_file, enable_multi_house=True)
+            results = analyzer.analyze_json_file(args.json_file, enable_multi_house=True, enable_navamsha=args.navamsha)
             
             # Restore original systems
             analyzer.house_systems = original_systems
