@@ -11,7 +11,7 @@ Example: python dasha_stock_analysis.py analysis/PLTR lagna,chandra_lagna
 
 import pandas as pd
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import time
 import sys
 import os
@@ -410,8 +410,110 @@ class EnhancedDashaStockAnalyzer:
                 else:  # Between 0.5 and 1.5 below 5
                     return 'lightcoral', 0.35
         
+        # Function to check if two periods overlap
+        def periods_overlap(period1, period2, min_gap_days=30):
+            # Convert dates to datetime objects if they're not already
+            def to_datetime(date_val):
+                if isinstance(date_val, datetime):
+                    return date_val
+                elif isinstance(date_val, str):
+                    return datetime.strptime(date_val, '%Y-%m-%d')
+                elif isinstance(date_val, date):
+                    return datetime.combine(date_val, datetime.min.time())
+                else:
+                    raise ValueError(f"Unexpected date type: {type(date_val)}")
+            
+            start1 = to_datetime(period1['start_date'])
+            end1 = to_datetime(period1['end_date'])
+            start2 = to_datetime(period2['start_date'])
+            end2 = to_datetime(period2['end_date'])
+            
+            # Calculate the midpoints
+            mid1 = start1 + (end1 - start1) / 2
+            mid2 = start2 + (end2 - start2) / 2
+            
+            # Check if the midpoints are within min_gap_days of each other
+            return abs((mid2 - mid1).days) < min_gap_days
+
         # Function to plot periods in a section
         def plot_section(periods, y_base, height, label_offset=0.02, period_type=''):
+            if not periods:
+                return
+                
+            # Sort periods by start date
+            periods = sorted(periods, key=lambda x: x['start_date'])
+            
+            # Different logic for different period types
+            if period_type == 'MD-AD-PD':  # Pratyantardashas - show 6 strongest non-consecutive
+                # Always include first and last
+                first_period = periods[0]
+                last_period = periods[-1]
+                
+                # For middle periods, get the strongest non-consecutive periods
+                middle_periods = periods[1:-1] if len(periods) > 2 else []
+                middle_periods_sorted = sorted(middle_periods, 
+                                             key=lambda x: abs(x.get('auspiciousness', 5.0) - 5.0), 
+                                             reverse=True)
+                
+                # Select non-consecutive periods
+                selected_periods = [first_period]
+                
+                for candidate in middle_periods_sorted:
+                    # Check if this candidate is consecutive with any already selected period
+                    is_consecutive = False
+                    for selected in selected_periods:
+                        if periods_overlap(candidate, selected, min_gap_days=15):  # Smaller gap for pratyantardashas
+                            is_consecutive = True
+                            break
+                    
+                    if not is_consecutive:
+                        selected_periods.append(candidate)
+                        # Stop when we have 6 total (including first and last)
+                        if len(selected_periods) >= 5:  # 5 because we'll add last_period
+                            break
+                
+                # Add last period if it's not already included and not consecutive with the last selected
+                if last_period not in selected_periods:
+                    # Check if last period is consecutive with any selected period
+                    is_consecutive = False
+                    for selected in selected_periods:
+                        if periods_overlap(last_period, selected, min_gap_days=15):
+                            is_consecutive = True
+                            break
+                    
+                    if not is_consecutive or len(selected_periods) < 6:
+                        selected_periods.append(last_period)
+                
+                periods_to_show = selected_periods
+                
+            else:  # Mahadashas and Antardashas - show all with overlap filtering
+                # Always show first and last periods
+                first_period = periods[0]
+                last_period = periods[-1]
+                
+                # For the remaining periods, filter based on significance and overlap
+                middle_periods = periods[1:-1] if len(periods) > 2 else []
+                filtered_periods = []
+                
+                i = 0
+                while i < len(middle_periods):
+                    current_period = middle_periods[i]
+                    auspiciousness = current_period.get('auspiciousness', 5.0)
+                    
+                    # Check for overlap with previous period
+                    if filtered_periods and periods_overlap(filtered_periods[-1], current_period):
+                        prev_auspiciousness = filtered_periods[-1].get('auspiciousness', 5.0)
+                        # Keep the one that deviates more from neutral (5.0)
+                        if abs(auspiciousness - 5.0) > abs(prev_auspiciousness - 5.0):
+                            filtered_periods[-1] = current_period
+                    else:
+                        filtered_periods.append(current_period)
+                    i += 1
+                
+                # Combine first, filtered middle, and last periods
+                periods_to_show = [first_period] + filtered_periods + [last_period]
+            
+            # Plot each period
             for period in periods:
                 original_start = period['start_date']
                 original_end = period['end_date']
@@ -438,24 +540,20 @@ class EnhancedDashaStockAnalyzer:
                                [y_top, y_top], 
                                color=color, alpha=alpha)
                 
-                # Add label based on period type
-                mid_date = effective_start + (effective_end - effective_start) / 2
-                label_y = y_top + (height * label_offset)
-                
-                # Determine if we should show the label
-                show_label = False
-                if period_type == 'MD':  # Show all mahadashas
-                    show_label = True
-                elif period_type == 'MD-AD':  # Show all antardashas
-                    show_label = True
-                elif period_type == 'MD-AD-PD':  # Show only significant prayantardashas
-                    show_label = abs(auspiciousness - 5.0) > 1.5
-                
-                if show_label:
+                # Add label if this period should be shown
+                if period in periods_to_show:
+                    mid_date = effective_start + (effective_end - effective_start) / 2
+                    
+                    # Position label within the colored region of the section
+                    if period_type == 'MD-AD-PD':  # Pratyantardashas - top 1/4 of section
+                        label_y = y_bottom + (height * 0.75)  # Top 1/4 of the section
+                    else:  # Mahadashas and Antardashas - middle of section
+                        label_y = y_bottom + (height * 0.5)  # Middle of the section
+                    
                     label_text = f"{period['period_label']}\n{auspiciousness:.1f}"
                     plt.annotate(label_text, xy=(mid_date, label_y),
-                               ha='center', va='bottom', fontsize=8,
-                               bbox=dict(boxstyle='round,pad=0.3', facecolor=color, alpha=0.7),
+                               ha='center', va='center', fontsize=8,
+                               bbox=dict(boxstyle='round,pad=0.3', facecolor=color, alpha=0.9),
                                rotation=0)
         
         # Plot each section with their respective period types
