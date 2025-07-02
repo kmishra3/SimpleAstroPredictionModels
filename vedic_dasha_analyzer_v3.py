@@ -821,11 +821,9 @@ class EnhancedVedicDashaAnalyzer:
                 if dasha_dt_local <= entity_birth_dt_local:
                     use_birth_positions_for_aarambha = True
                     aarambha_positions = birth_positions  # Use the birth positions directly
-                    print(f"   🎯 Dasha-aarambha correction: Using birth-time positions for {dasha_planet} (dasha active at birth)")
                 else:
                     # Dasha starts after birth, use actual dasha start positions
                     aarambha_positions = self.get_planetary_positions(dasha_dt_local)
-                    print(f"   📅 Standard dasha-aarambha: Using dasha start positions for {dasha_planet}")
             else:
                 # No entity birth date provided, use dasha start positions (legacy behavior)
                 aarambha_positions = self.get_planetary_positions(dasha_dt_local)
