@@ -7,7 +7,11 @@ Uses sideralib for sidereal ephemeris calculations instead of swisseph
 INSTALLATION REQUIREMENTS:
 Before running this script, install the required dependencies:
 
-pip install sideralib pandas pytz geopy timezonefinder markdown weasyprint
+pip install sideralib pandas pytz geopy timezonefinder markdown
+
+For PDF generation (platform dependent):
+- On Windows: pip install pdfkit (and install wkhtmltopdf from: https://wkhtmltopdf.org/downloads.html)
+- On Linux/Mac: pip install weasyprint
 
 This version uses sideralib instead of pyswisseph for planetary calculations.
 sideralib provides sidereal (Vedic) astrological calculations specifically designed
@@ -26,6 +30,7 @@ USAGE:
 CHANGES FROM v2:
 - Replaced pyswisseph with sideralib for better sidereal calculations
 - Simplified ephemeris setup (no need for Swiss Ephemeris data files)
+- Added cross-platform PDF generation support (WeasyPrint or pdfkit)
 - Maintained all existing functionality and analysis methods
 - Better cross-platform compatibility
 """
@@ -45,12 +50,47 @@ from pathlib import Path
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import markdown
-try:
-    from weasyprint import HTML, CSS
-    WEASYPRINT_AVAILABLE = True
-except ImportError:
-    WEASYPRINT_AVAILABLE = False
-    print("Warning: WeasyPrint not available. PDF generation will be disabled.")
+
+# PDF Generation setup based on platform
+PDF_GENERATOR = None
+WKHTMLTOPDF_PATH = None
+if platform.system() == 'Windows':
+    try:
+        import pdfkit
+        # Check common installation paths for wkhtmltopdf
+        possible_paths = [
+            r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe",
+            r"C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe",
+        ]
+        for path in possible_paths:
+            if os.path.exists(path):
+                WKHTMLTOPDF_PATH = path
+                break
+        
+        if WKHTMLTOPDF_PATH:
+            PDF_GENERATOR = 'pdfkit'
+        else:
+            print("Warning: wkhtmltopdf not found in common locations.")
+            print("Please install wkhtmltopdf from: https://wkhtmltopdf.org/downloads.html")
+            print("Expected paths:")
+            for path in possible_paths:
+                print(f"- {path}")
+    except ImportError:
+        print("Warning: pdfkit not available. Install with: pip install pdfkit")
+        print("Also install wkhtmltopdf from: https://wkhtmltopdf.org/downloads.html")
+else:
+    try:
+        from weasyprint import HTML, CSS
+        PDF_GENERATOR = 'weasyprint'
+    except ImportError:
+        try:
+            import pdfkit
+            PDF_GENERATOR = 'pdfkit'
+        except ImportError:
+            print("Warning: Neither WeasyPrint nor pdfkit available. PDF generation will be disabled.")
+            print("Install either:")
+            print("- WeasyPrint: pip install weasyprint")
+            print("- pdfkit: pip install pdfkit (and wkhtmltopdf)")
 
 class EnhancedVedicDashaAnalyzer:
     """Enhanced Vedic Dasha Analyzer v3 with Multi-House System Support using sideralib"""
@@ -1943,213 +1983,80 @@ class EnhancedVedicDashaAnalyzer:
         return descriptions.get(system_name, 'Custom house system calculation')
 
     def generate_pdf_report(self, markdown_content: str, output_dir: str, symbol: str) -> Optional[str]:
-        """Generate PDF version of the markdown report using WeasyPrint"""
-        if not WEASYPRINT_AVAILABLE:
-            print(f"Warning: WeasyPrint not available. Skipping PDF generation for {symbol}.")
+        """
+        Generate PDF report from markdown content using available PDF generator
+        
+        Args:
+            markdown_content: Markdown formatted content
+            output_dir: Output directory path
+            symbol: Stock symbol for filename
+            
+        Returns:
+            Path to generated PDF file or None if generation failed
+        """
+        if not PDF_GENERATOR:
+            print("Warning: PDF generation is disabled. No PDF generator available.")
             return None
             
         try:
             # Convert markdown to HTML
-            html_content = markdown.markdown(markdown_content, extensions=['tables', 'toc'])
+            html_content = markdown.markdown(
+                markdown_content,
+                extensions=['tables', 'fenced_code']
+            )
             
-            # Add enhanced CSS styling for better PDF appearance
-            styled_html = f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>{symbol} - Vedic Dasha Analysis Report</title>
-            </head>
-            <body>
-                {html_content}
-            </body>
-            </html>
+            # Add basic CSS styling
+            css_style = """
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; }
+                table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f5f5f5; }
+                h1, h2, h3 { color: #333; }
+                .chart { max-width: 100%; height: auto; }
+            </style>
             """
             
-            # Define CSS styles
-            css_styles = CSS(string="""
-                @page {
-                    size: A4;
-                    margin: 0.75in;
-                    @bottom-center {
-                        content: counter(page) " of " counter(pages);
-                        font-size: 10px;
-                        color: #666;
-                    }
-                }
-                
-                body {
-                    font-family: 'Helvetica', 'Arial', sans-serif;
-                    line-height: 1.6;
-                    color: #333;
-                    font-size: 11px;
-                }
-                
-                h1 {
-                    color: #2c3e50;
-                    font-size: 24px;
-                    border-bottom: 3px solid #3498db;
-                    padding-bottom: 10px;
-                    margin-top: 30px;
-                    margin-bottom: 20px;
-                    page-break-after: avoid;
-                }
-                
-                h2 {
-                    color: #2c3e50;
-                    font-size: 18px;
-                    border-bottom: 1px solid #bdc3c7;
-                    padding-bottom: 5px;
-                    margin-top: 25px;
-                    margin-bottom: 15px;
-                    page-break-after: avoid;
-                }
-                
-                h3 {
-                    color: #34495e;
-                    font-size: 16px;
-                    margin-top: 20px;
-                    margin-bottom: 12px;
-                    page-break-after: avoid;
-                }
-                
-                h4 {
-                    color: #34495e;
-                    font-size: 14px;
-                    margin-top: 15px;
-                    margin-bottom: 10px;
-                    page-break-after: avoid;
-                }
-                
-                table {
-                    border-collapse: collapse;
-                    width: 100%;
-                    margin: 15px 0;
-                    font-size: 9px;
-                    page-break-inside: avoid;
-                }
-                
-                th, td {
-                    border: 1px solid #ddd;
-                    padding: 6px;
-                    text-align: left;
-                    vertical-align: top;
-                }
-                
-                th {
-                    background-color: #f8f9fa;
-                    font-weight: bold;
-                    color: #2c3e50;
-                }
-                
-                tr:nth-child(even) {
-                    background-color: #f8f9fa;
-                }
-                
-                .strong-buy {
-                    background-color: #d4edda !important;
-                }
-                
-                .sell {
-                    background-color: #f8d7da !important;
-                }
-                
-                blockquote {
-                    border-left: 4px solid #3498db;
-                    margin: 15px 0;
-                    padding: 0 15px;
-                    background-color: #f8f9fa;
-                    font-style: italic;
-                }
-                
-                code {
-                    background-color: #f4f4f4;
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                    font-family: 'Courier New', monospace;
-                    font-size: 10px;
-                }
-                
-                pre {
-                    background-color: #f4f4f4;
-                    padding: 10px;
-                    border-radius: 5px;
-                    overflow-x: auto;
-                    font-family: 'Courier New', monospace;
-                    font-size: 10px;
-                }
-                
-                ul, ol {
-                    margin: 10px 0;
-                    padding-left: 20px;
-                }
-                
-                li {
-                    margin: 5px 0;
-                }
-                
-                p {
-                    margin: 8px 0;
-                    text-align: justify;
-                }
-                
-                .page-break {
-                    page-break-before: always;
-                }
-                
-                strong {
-                    color: #2c3e50;
-                }
-                
-                /* Specific styling for investment tables */
-                table th:first-child {
-                    width: 15%;
-                }
-                
-                table th:nth-child(2) {
-                    width: 15%;
-                }
-                
-                /* Emoji handling */
-                .emoji {
-                    font-size: 12px;
-                }
-            """)
+            html_content = f"<html><head>{css_style}</head><body>{html_content}</body></html>"
             
-            # Generate PDF file path
-            pdf_file = os.path.join(output_dir, f"{symbol}_Vedic_Analysis_Report.pdf")
+            # Create output directory if it doesn't exist
+            os.makedirs(output_dir, exist_ok=True)
+            pdf_path = os.path.join(output_dir, f"{symbol}_analysis.pdf")
             
-            # Generate PDF using WeasyPrint
-            HTML(string=styled_html).write_pdf(pdf_file, stylesheets=[css_styles])
+            if PDF_GENERATOR == 'weasyprint':
+                HTML(string=html_content).write_pdf(pdf_path)
+            elif PDF_GENERATOR == 'pdfkit':
+                options = {
+                    'page-size': 'A4',
+                    'margin-top': '20mm',
+                    'margin-right': '20mm',
+                    'margin-bottom': '20mm',
+                    'margin-left': '20mm',
+                    'encoding': 'UTF-8'
+                }
+                # Use explicit path to wkhtmltopdf on Windows
+                if platform.system() == 'Windows' and WKHTMLTOPDF_PATH:
+                    config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
+                    pdfkit.from_string(html_content, pdf_path, options=options, configuration=config)
+                else:
+                    pdfkit.from_string(html_content, pdf_path, options=options)
+                
+            print(f"PDF report generated: {pdf_path}")
+            return pdf_path
             
-            print(f"PDF report saved: {os.path.basename(pdf_file)}")
-            return pdf_file
-            
-        except ImportError:
-            print(f"Warning: WeasyPrint not installed. PDF generation skipped.")
-            print("Install with: pip install weasyprint")
-            return None
         except Exception as e:
-            print(f"Warning: Could not generate PDF report: {e}")
-            print("Note: WeasyPrint requires system dependencies that may not be installed.")
-            
-            # Provide platform-specific installation suggestions
-            import platform
-            system = platform.system().lower()
-            if system == "darwin":  # macOS
-                print("For macOS:")
-                print("  - With Homebrew: brew install pango libffi")
-                print("  - Then: pip install weasyprint")
-            elif system == "linux":  # Linux
-                print("For Linux (Ubuntu/Debian): sudo apt-get install build-essential python3-dev python3-pip python3-setuptools python3-wheel python3-cffi libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info")
-                print("For Linux (CentOS/RHEL): sudo yum install redhat-rpm-config python3-devel python3-pip python3-setuptools python3-wheel python3-cffi libffi-devel cairo pango gdk-pixbuf2")
-                print("Then: pip install weasyprint")
-            elif system == "windows":  # Windows
-                print("For Windows: pip install weasyprint")
-                print("Note: Windows installation is usually simpler as dependencies are included")
-            else:
-                print("Please check WeasyPrint documentation for your platform: https://weasyprint.readthedocs.io/en/stable/install.html")
-            
+            print(f"Error generating PDF report: {str(e)}")
+            if PDF_GENERATOR == 'pdfkit':
+                print("\nTroubleshooting wkhtmltopdf:")
+                if platform.system() == 'Windows':
+                    if not WKHTMLTOPDF_PATH:
+                        print("1. wkhtmltopdf not found in common locations. Please:")
+                        print("   - Download from: https://wkhtmltopdf.org/downloads.html")
+                        print("   - Install to default location (C:\\Program Files\\wkhtmltopdf)")
+                    else:
+                        print(f"1. Using wkhtmltopdf from: {WKHTMLTOPDF_PATH}")
+                        print("   If this path is incorrect, please reinstall wkhtmltopdf")
+                print("2. After installation, restart your Python script")
             return None
 
 def main():

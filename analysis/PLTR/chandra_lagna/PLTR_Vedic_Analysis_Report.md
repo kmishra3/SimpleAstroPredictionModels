@@ -1,7 +1,7 @@
 # 🏛️ Vedic Dasha Analysis Report - PLTR
 **Palantir Technologies Inc.** | **House System:** Chandra Lagna (Moon)
 
-*Generated on June 30, 2025 at 07:45 PM*
+*Generated on June 30, 2025 at 08:33 PM*
 
 ---
 
@@ -18,7 +18,7 @@
 
 ### Key Metrics
 - **Total Periods Analyzed:** 739
-- **Protection Rate:** 47.1% (348/739 periods)
+- **Protection Rate:** 38.8% (287/739 periods)
 - **Perfect Scores (≥9.5):** 0
 - **Analysis Depth:** 3-level (Maha + Antar + Pratyantar Dashas)
 
@@ -45,16 +45,16 @@
 
 | Date Range | MD-AD-PD Combination | Current Score | Next Score | Change | Action | Selection Criteria | Astrological Significance | Confidence |
 |------------|---------------------|---------------|------------|--------|--------|-------------------|---------------------------|------------|
-| 2020-08-18 - 2022-12-30 | Jupiter-Rahu | 5.5 | 7.3 | +1.8 | **BUY** | Score improving 1.8 points | Jupiter dasha (benefic); lord in moderate strength; moderate protective influence; strong luminaries | MEDIUM 🟡 PAST |
-| 2020-12-24 - 2021-04-17 | Jupiter-Rahu-Jupiter | 4.1 | 7.3 | +3.2 | **STRONG BUY** | Score improving 3.2 points from low base | Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); moderate protective influence; | MEDIUM 🟡 PAST |
-| 2022-07-08 - 2022-08-19 | Jupiter-Rahu-Sun | 5.0 | 8.7 | +3.7 | **STRONG BUY** | Score improving 3.7 points from low base | Jupiter dasha (benefic); lord in moderate strength; strong protective cancellations; balanced solar- | HIGH 🟡 PAST |
-| 2022-10-29 - 2022-12-18 | Jupiter-Rahu-Mars | 4.2 | 6.8 | +2.6 | **STRONG BUY** | Score improving 2.6 points from low base | Jupiter dasha (benefic); lord in moderate strength; moderate protective influence; challenging lumin | MEDIUM 🟡 PAST |
-| 2024-02-07 - 2024-04-10 | Saturn-Saturn-Ketu | 4.1 | 8.2 | +4.1 | **STRONG BUY** | Score improving 4.1 points from low base | Saturn dasha (malefic); lord in moderate strength; balanced solar-lunar influence; Ketu sub-sub-peri | HIGH 🟡 PAST |
-| 2026-07-25 - 2026-09-18 | Saturn-Mercury-Ketu | 4.6 | 8.2 | +3.6 | **STRONG BUY** | Score improving 3.6 points from low base | Saturn dasha (malefic); lord in moderate strength; strong protective cancellations; challenging lumi | HIGH 🔵 FUTURE |
-| 2028-11-04 - 2028-11-27 | Saturn-Mercury-Ketu | 4.2 | 7.3 | +3.1 | **STRONG BUY** | Score improving 3.1 points from low base | Saturn dasha (malefic); lord in moderate strength; balanced solar-lunar influence; Mercury sub-perio | MEDIUM 🔵 FUTURE |
-| 2029-08-07 - 2029-10-08 | Saturn-Ketu-Saturn | 2.7 | 7.8 | +5.1 | **STRONG BUY** | Score improving 5.1 points from low base | Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); balanced solar-lunar influence; | HIGH 🔵 FUTURE |
-| 2031-01-15 - 2031-07-03 | Saturn-Venus-Rahu | 2.7 | 5.0 | +2.4 | **BUY** | Score improving 2.4 points | Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); balanced solar-lunar influence; | MEDIUM 🔵 FUTURE |
-| 2033-01-21 - 2033-02-07 | Saturn-Venus-Sun | 4.1 | 8.7 | +4.6 | **STRONG BUY** | Score improving 4.6 points from low base | Saturn dasha (malefic); lord in moderate strength; balanced solar-lunar influence; Venus sub-period  | HIGH 🔵 FUTURE |
+| 2020-12-24 - 2021-04-17 | Jupiter-Rahu-Jupiter | 4.1 | 5.8 | +1.7 | **BUY** | Score improving 1.7 points | Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); moderate protective influence; | MEDIUM 🟡 PAST |
+| 2022-07-08 - 2022-08-19 | Jupiter-Rahu-Sun | 3.6 | 6.1 | +2.6 | **STRONG BUY** | Score improving 2.6 points from low base | Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); challenging luminaries configu | MEDIUM 🟡 PAST |
+| 2022-10-29 - 2022-12-18 | Jupiter-Rahu-Mars | 3.5 | 5.5 | +1.9 | **BUY** | Score improving 1.9 points | Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); challenging luminaries configu | MEDIUM 🟡 PAST |
+| 2024-02-07 - 2024-04-10 | Saturn-Saturn-Ketu | 4.7 | 6.7 | +2.0 | **BUY** | Score improving 2.0 points | Saturn dasha (malefic); lord in strong; challenging luminaries configuration; Ketu sub-sub-period (m | MEDIUM 🟡 PAST |
+| 2026-07-25 - 2026-09-18 | Saturn-Mercury-Ketu | 3.6 | 5.1 | +1.6 | **BUY** | Score improving 1.6 points | Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); moderate protective influence;  | MEDIUM 🔵 FUTURE |
+| 2029-02-20 - 2029-03-25 | Saturn-Ketu-Moon | 1.8 | 3.3 | +1.5 | **BUY** | Score improving 1.5 points | Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); challenging luminaries configur | MEDIUM 🔵 FUTURE |
+| 2031-07-03 - 2031-11-29 | Saturn-Venus-Jupiter | 3.3 | 5.3 | +2.0 | **BUY** | Score improving 2.0 points | Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); challenging luminaries configur | MEDIUM 🔵 FUTURE |
+| 2033-01-21 - 2033-02-07 | Saturn-Venus-Sun | 2.5 | 4.6 | +2.1 | **BUY** | Score improving 2.1 points | Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); challenging luminaries configur | MEDIUM 🔵 FUTURE |
+| 2033-06-30 - 2033-08-23 | Saturn-Sun-Saturn | 2.2 | 5.0 | +2.8 | **STRONG BUY** | Score improving 2.8 points from low base | Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); challenging luminaries configur | MEDIUM 🔵 FUTURE |
+| 2035-02-10 - 2035-03-14 | Saturn-Moon-Ketu | 2.0 | 4.4 | +2.5 | **BUY** | Score improving 2.5 points | Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); challenging luminaries configur | MEDIUM 🔵 FUTURE |
 
 ### 📉 Strategic Sell Opportunities - "Sell the Peak Before the Decline"
 
@@ -62,16 +62,16 @@
 
 | Date Range | MD-AD-PD Combination | Current Score | Next Score | Change | Action | Selection Criteria | Astrological Significance | Confidence |
 |------------|---------------------|---------------|------------|--------|--------|-------------------|---------------------------|------------|
-| 2020-09-30 - 2020-12-24 | Jupiter-Rahu-Rahu | 7.3 | 4.1 | -3.2 | **STRONG SELL** | Score declining -3.2 points from high base | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prot | MEDIUM 📊 PAST |
-| 2021-08-29 - 2021-12-28 | Jupiter-Rahu-Mercury | 9.1 | 6.8 | -2.3 | **SELL** | Score declining -2.3 points | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prot | MEDIUM 📊 PAST |
-| 2022-08-19 - 2022-10-29 | Jupiter-Rahu-Moon | 8.7 | 4.2 | -4.5 | **STRONG SELL** | Score declining -4.5 points from high base | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); strong protective cancella | HIGH 📊 PAST |
-| 2024-04-10 - 2024-10-05 | Saturn-Saturn-Venus | 8.2 | 4.5 | -3.6 | **STRONG SELL** | Score declining -3.6 points from high base | Saturn dasha (malefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prote | HIGH 📊 PAST |
-| 2026-09-18 - 2027-02-24 | Saturn-Mercury-Venus | 8.2 | 4.5 | -3.6 | **STRONG SELL** | Score declining -3.6 points from high base | Saturn dasha (malefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prote | HIGH 📅 FUTURE |
-| 2028-11-27 - 2029-02-01 | Saturn-Ketu-Venus | 7.3 | 4.1 | -3.2 | **STRONG SELL** | Score declining -3.2 points from high base | Saturn dasha (malefic); lord in exceptionally strong (exalted/own sign); moderate protective influen | MEDIUM 📅 FUTURE |
-| 2029-06-15 - 2029-08-07 | Saturn-Ketu-Jupiter | 5.5 | 2.7 | -2.8 | **SELL** | Score declining -2.8 points | Saturn dasha (malefic); lord in moderate strength; strong luminaries support; Ketu sub-period (malef | MEDIUM 📅 FUTURE |
-| 2029-10-08 - 2029-12-03 | Saturn-Ketu-Mercury | 7.8 | 5.0 | -2.7 | **STRONG SELL** | Score declining -2.7 points from high base | Saturn dasha (malefic); lord in exceptionally strong (exalted/own sign); strong protective cancellat | MEDIUM 📅 FUTURE |
-| 2033-03-07 - 2033-03-27 | Saturn-Sun-Mars | 7.7 | 5.0 | -2.7 | **STRONG SELL** | Score declining -2.7 points from high base | Saturn dasha (malefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prote | MEDIUM 📅 FUTURE |
-| 2033-08-23 - 2033-10-10 | Saturn-Sun-Mercury | 6.0 | 4.1 | -1.9 | **SELL** | Score declining -1.9 points | Saturn dasha (malefic); lord in moderate strength; strong luminaries support; Sun sub-period (malefi | MEDIUM 📅 FUTURE |
+| 2020-09-30 - 2020-12-24 | Jupiter-Rahu-Rahu | 7.0 | 4.1 | -2.9 | **STRONG SELL** | Score declining -2.9 points from high base | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prot | MEDIUM 📊 PAST |
+| 2021-08-29 - 2021-12-28 | Jupiter-Rahu-Mercury | 7.3 | 5.3 | -2.0 | **SELL** | Score declining -2.0 points | Jupiter dasha (benefic); lord in moderate strength; triple Arishta-Bhanga protection; strong luminar | MEDIUM 📊 PAST |
+| 2022-08-19 - 2022-10-29 | Jupiter-Rahu-Moon | 6.1 | 3.5 | -2.6 | **STRONG SELL** | Score declining -2.6 points from high base | Jupiter dasha (benefic); lord in moderate strength; moderate protective influence; strong luminaries | MEDIUM 📊 PAST |
+| 2042-09-11 - 2043-02-01 | Mercury-Mercury-Venus | 8.2 | 3.3 | -4.9 | **STRONG SELL** | Score declining -4.9 points from high base | Mercury dasha (benefic); lord in exceptionally strong (exalted/own sign); strong protective cancella | HIGH 📅 FUTURE |
+| 2048-08-26 - 2048-10-05 | Mercury-Sun-Jupiter | 6.8 | 4.9 | -1.9 | **SELL** | Score declining -1.9 points | Mercury dasha (benefic); lord in strong; moderate protective influence; balanced solar-lunar influen | MEDIUM 📅 FUTURE |
+| 2053-09-16 - 2053-11-30 | Mercury-Rahu-Moon | 5.6 | 3.6 | -2.0 | **SELL** | Score declining -2.0 points | Mercury dasha (benefic); lord in moderate strength; moderate protective influence; balanced solar-lu | MEDIUM 📅 FUTURE |
+| 2054-09-27 - 2055-01-19 | Mercury-Jupiter-Mercury | 6.5 | 4.7 | -1.8 | **SELL** | Score declining -1.8 points | Mercury dasha (benefic); lord in strong; strong protective cancellations; challenging luminaries con | MEDIUM 📅 FUTURE |
+| 2055-03-06 - 2055-07-19 | Mercury-Jupiter-Venus | 7.2 | 5.5 | -1.7 | **SELL** | Score declining -1.7 points | Mercury dasha (benefic); lord in moderate strength; triple Arishta-Bhanga protection; balanced solar | MEDIUM 📅 FUTURE |
+| 2055-08-28 - 2055-11-03 | Mercury-Jupiter-Moon | 7.3 | 4.8 | -2.4 | **SELL** | Score declining -2.4 points | Mercury dasha (benefic); lord in strong; strong protective cancellations; balanced solar-lunar influ | MEDIUM 📅 FUTURE |
+| 2059-05-03 - 2059-05-15 | Ketu-Ketu-Moon | 7.2 | 5.5 | -1.7 | **SELL** | Score declining -1.7 points | Ketu dasha (malefic); lord in strong; triple Arishta-Bhanga protection; balanced solar-lunar influen | MEDIUM 📅 FUTURE |
 
 ---
 
@@ -85,29 +85,29 @@
 
 | Date Range | MD-AD-PD Combination | Current→Next Score | Change | Action | Selection Criteria | Astrological Significance | Timing Strategy |
 |------------|---------------------|-------------------|--------|--------|-------------------|---------------------------|-----------------|
-| 2020-08-18 - 2022-12-30 | Jupiter-Rahu | 5.5 → 7.3 | +1.8 | **BUY** | Score improving 1.8 points | Jupiter dasha (benefic); lord in moderate strength; moderate protective influence; strong luminaries | 📈 **PLANNED** - Gradual accumulation recommended |
-| 2020-12-24 - 2021-04-17 | Jupiter-Rahu-Jupiter | 4.1 → 7.3 | +3.2 | **STRONG BUY** | Score improving 3.2 points from low base | Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); moderate protective influence; | 🚨 **URGENT** - Begin accumulating immediately |
-| 2022-07-08 - 2022-08-19 | Jupiter-Rahu-Sun | 5.0 → 8.7 | +3.7 | **STRONG BUY** | Score improving 3.7 points from low base | Jupiter dasha (benefic); lord in moderate strength; strong protective cancellations; balanced solar- | 🚨 **URGENT** - Begin accumulating immediately |
-| 2022-10-29 - 2022-12-18 | Jupiter-Rahu-Mars | 4.2 → 6.8 | +2.6 | **STRONG BUY** | Score improving 2.6 points from low base | Jupiter dasha (benefic); lord in moderate strength; moderate protective influence; challenging lumin | ⚡ **PRIORITY** - Start building position this period |
-| 2024-02-07 - 2024-04-10 | Saturn-Saturn-Ketu | 4.1 → 8.2 | +4.1 | **STRONG BUY** | Score improving 4.1 points from low base | Saturn dasha (malefic); lord in moderate strength; balanced solar-lunar influence; Ketu sub-sub-peri | 🚨 **URGENT** - Begin accumulating immediately |
+| 2020-12-24 - 2021-04-17 | Jupiter-Rahu-Jupiter | 4.1 → 5.8 | +1.7 | **BUY** | Score improving 1.7 points | Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); moderate protective influence; | 📈 **PLANNED** - Gradual accumulation recommended |
+| 2022-07-08 - 2022-08-19 | Jupiter-Rahu-Sun | 3.6 → 6.1 | +2.6 | **STRONG BUY** | Score improving 2.6 points from low base | Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); challenging luminaries configu | ⚡ **PRIORITY** - Start building position this period |
+| 2022-10-29 - 2022-12-18 | Jupiter-Rahu-Mars | 3.5 → 5.5 | +1.9 | **BUY** | Score improving 1.9 points | Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); challenging luminaries configu | 📈 **PLANNED** - Gradual accumulation recommended |
+| 2024-02-07 - 2024-04-10 | Saturn-Saturn-Ketu | 4.7 → 6.7 | +2.0 | **BUY** | Score improving 2.0 points | Saturn dasha (malefic); lord in strong; challenging luminaries configuration; Ketu sub-sub-period (m | ⚡ **PRIORITY** - Start building position this period |
+| 2026-07-25 - 2026-09-18 | Saturn-Mercury-Ketu | 3.6 → 5.1 | +1.6 | **BUY** | Score improving 1.6 points | Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); moderate protective influence;  | 📈 **PLANNED** - Gradual accumulation recommended |
 
 **🔴 IMMEDIATE SELL SIGNALS - Act Before Price Drop**
 
 | Date Range | MD-AD-PD Combination | Current→Next Score | Change | Action | Selection Criteria | Astrological Significance | Risk Management |
 |------------|---------------------|-------------------|--------|--------|-------------------|---------------------------|-----------------|
-| 2020-09-30 - 2020-12-24 | Jupiter-Rahu-Rahu | 7.3 → 4.1 | -3.2 | **STRONG SELL** | Score declining -3.2 points from high base | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prot | 🚨 **CRITICAL** - Exit positions before period ends |
-| 2021-08-29 - 2021-12-28 | Jupiter-Rahu-Mercury | 9.1 → 6.8 | -2.3 | **SELL** | Score declining -2.3 points | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prot | ⚠️ **HIGH PRIORITY** - Reduce exposure significantly |
-| 2022-08-19 - 2022-10-29 | Jupiter-Rahu-Moon | 8.7 → 4.2 | -4.5 | **STRONG SELL** | Score declining -4.5 points from high base | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); strong protective cancella | 🚨 **CRITICAL** - Exit positions before period ends |
-| 2024-04-10 - 2024-10-05 | Saturn-Saturn-Venus | 8.2 → 4.5 | -3.6 | **STRONG SELL** | Score declining -3.6 points from high base | Saturn dasha (malefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prote | 🚨 **CRITICAL** - Exit positions before period ends |
-| 2026-09-18 - 2027-02-24 | Saturn-Mercury-Venus | 8.2 → 4.5 | -3.6 | **STRONG SELL** | Score declining -3.6 points from high base | Saturn dasha (malefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prote | 🚨 **CRITICAL** - Exit positions before period ends |
+| 2020-09-30 - 2020-12-24 | Jupiter-Rahu-Rahu | 7.0 → 4.1 | -2.9 | **STRONG SELL** | Score declining -2.9 points from high base | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); triple Arishta-Bhanga prot | ⚠️ **HIGH PRIORITY** - Reduce exposure significantly |
+| 2021-08-29 - 2021-12-28 | Jupiter-Rahu-Mercury | 7.3 → 5.3 | -2.0 | **SELL** | Score declining -2.0 points | Jupiter dasha (benefic); lord in moderate strength; triple Arishta-Bhanga protection; strong luminar | 📉 **DEFENSIVE** - Take profits, tighten stops |
+| 2022-08-19 - 2022-10-29 | Jupiter-Rahu-Moon | 6.1 → 3.5 | -2.6 | **STRONG SELL** | Score declining -2.6 points from high base | Jupiter dasha (benefic); lord in moderate strength; moderate protective influence; strong luminaries | ⚠️ **HIGH PRIORITY** - Reduce exposure significantly |
+| 2042-09-11 - 2043-02-01 | Mercury-Mercury-Venus | 8.2 → 3.3 | -4.9 | **STRONG SELL** | Score declining -4.9 points from high base | Mercury dasha (benefic); lord in exceptionally strong (exalted/own sign); strong protective cancella | 🚨 **CRITICAL** - Exit positions before period ends |
+| 2048-08-26 - 2048-10-05 | Mercury-Sun-Jupiter | 6.8 → 4.9 | -1.9 | **SELL** | Score declining -1.9 points | Mercury dasha (benefic); lord in strong; moderate protective influence; balanced solar-lunar influen | 📉 **DEFENSIVE** - Take profits, tighten stops |
 
 **🟡 HOLD PERIODS - Maintain Current Strategy**
 
 | Date Range | MD-AD-PD Combination | Score Range | Action | Selection Criteria | Astrological Significance | Strategy |
 |------------|---------------------|-------------|--------|-------------------|---------------------------|----------|
-| 2007-03-24 - 2023-03-24 | Jupiter | 5.5 → 5.5 | **HOLD** | Stable score (change: -0.0) | Jupiter dasha (benefic); lord in moderate strength; strong luminaries support | Maintain current strategy |
-| 2022-02-16 - 2022-07-08 | Jupiter-Rahu-Venus | 5.5 → 5.0 | **HOLD** | Stable score (change: -0.5) | Jupiter dasha (benefic); lord in moderate strength; moderate protective influence; balanced solar-lu | Maintain current strategy |
-| 2023-03-24 - 2023-09-09 | Jupiter-Saturn-Saturn | 6.8 → 6.8 | **HOLD** | Stable score (change: 0.0) | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); strong protective cancella | Maintain current strategy |
+| 2007-03-24 - 2023-03-24 | Jupiter | 6.9 → 7.7 | **HOLD** | Stable score (change: 0.8) | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); balanced solar-lunar influ | Maintain current strategy |
+| 2020-08-18 - 2022-12-30 | Jupiter-Rahu | 7.7 → 7.0 | **HOLD** | Stable score (change: -0.7) | Jupiter dasha (benefic); lord in exceptionally strong (exalted/own sign); moderate protective influe | Maintain current strategy |
+| 2021-12-28 - 2022-02-16 | Jupiter-Rahu-Ketu | 5.3 → 4.8 | **HOLD** | Stable score (change: -0.5) | Jupiter dasha (benefic); lord in moderate strength; strong protective cancellations; challenging lum | Maintain current strategy |
 
 ---
 
@@ -209,9 +209,9 @@
 
 ### Arishta-Bhanga Protection System
 
-Palantir Technologies Inc. benefits from exceptional protection through classical Vedic cancellation rules:
+Palantir Technologies Inc. benefits from strong protection through classical Vedic cancellation rules:
 
-#### Protection Rate: 47.1% (348/739 periods)
+#### Protection Rate: 38.8% (287/739 periods)
 
 #### Triple Protection Periods (Highest Safety)
 1. **2020-09-30 to 2020-12-24:** Jupiter-Rahu-Rahu (3 protections)
@@ -223,11 +223,11 @@ Palantir Technologies Inc. benefits from exceptional protection through classica
 ### Risk Periods Requiring Caution
 
 #### Challenging Windows (Score < 3.5)
-- **2028-05-23 to 2028-10-21:** Saturn-Mercury-Saturn (3.12/10)
-- **2029-08-07 to 2029-10-08:** Saturn-Ketu-Saturn (2.67/10)
-- **2031-01-15 to 2031-07-03:** Saturn-Venus-Rahu (2.67/10)
-- **2033-10-29 to 2033-12-24:** Saturn-Sun-Venus (3.25/10)
-- **2044-10-25 to 2044-11-12:** Mercury-Ketu-Sun (2.31/10)
+- **2025-10-04 to 2026-02-24:** Saturn-Saturn-Jupiter (2.68/10)
+- **2027-02-24 to 2027-04-13:** Saturn-Mercury-Sun (2.88/10)
+- **2027-04-13 to 2027-07-02:** Saturn-Mercury-Moon (3.30/10)
+- **2027-08-27 to 2028-01-17:** Saturn-Mercury-Rahu (3.28/10)
+- **2028-01-17 to 2028-05-23:** Saturn-Mercury-Jupiter (2.68/10)
 
 **Risk Mitigation Strategy:** During low-scoring periods, focus on:
 - Conservative financial management
@@ -243,15 +243,15 @@ Palantir Technologies Inc. benefits from exceptional protection through classica
 
 | Period | Maha Lord | Duration | Auspiciousness | Key Characteristics |
 |--------|-----------|----------|----------------|-------------------|
-| 2007-2023 | Jupiter | 16 years | 5.50/10 | Wisdom & Growth |
-| **2023-2042** | **Saturn** | **19 years** | **6.80/10** | **Structure & Discipline **CURRENT**** |
-| 2042-2059 | Mercury | 17 years | 4.51/10 | Communication & Technology |
-| 2059-2066 | Ketu | 7 years | 7.26/10 | Spiritual Evolution |
-| 2066-2086 | Venus | 20 years | 5.05/10 | Expansion & Prosperity |
-| 2086-2092 | Sun | 6 years | 5.00/10 | Leadership & Authority |
-| 2092-2102 | Moon | 10 years | 5.05/10 | Emotional Growth |
-| 2102-2109 | Mars | 7 years | 4.55/10 | Action & Implementation |
-| 2109-2127 | Rahu | 18 years | 5.00/10 | Innovation & Transformation |
+| 2007-2023 | Jupiter | 16 years | 6.90/10 | Wisdom & Growth |
+| **2023-2042** | **Saturn** | **19 years** | **5.56/10** | **Structure & Discipline **CURRENT**** |
+| 2042-2059 | Mercury | 17 years | 3.58/10 | Communication & Technology |
+| 2059-2066 | Ketu | 7 years | 6.74/10 | Spiritual Evolution |
+| 2066-2086 | Venus | 20 years | 3.76/10 | Expansion & Prosperity |
+| 2086-2092 | Sun | 6 years | 3.22/10 | Leadership & Authority |
+| 2092-2102 | Moon | 10 years | 3.42/10 | Emotional Growth |
+| 2102-2109 | Mars | 7 years | 3.10/10 | Action & Implementation |
+| 2109-2127 | Rahu | 18 years | 2.75/10 | Innovation & Transformation |
 
 ---
 
@@ -279,9 +279,9 @@ Palantir Technologies Inc. demonstrates a moderate astrological foundation with 
 
 **Key Insights:**
 1. **Overall Strength:** 0/9 planets in high dignity
-2. **Protection Rate:** 47.1% of periods have safeguards
+2. **Protection Rate:** 38.8% of periods have safeguards
 3. **Peak Opportunities:** 0 perfect scores (≥9.5) identified
-4. **Risk Management:** 39 ultra-safe periods with triple protection
+4. **Risk Management:** 28 ultra-safe periods with triple protection
 
 The analysis reveals multiple high-opportunity windows for strategic initiatives, with strong protective influences throughout most periods.
 

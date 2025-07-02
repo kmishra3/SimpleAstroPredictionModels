@@ -1,0 +1,7 @@
+Date,End_Date,Type,mahadasha_lord,antardasha_lord,pratyantardasha_lord,Planet,Parent_Planet,Auspiciousness_Score,Dasha_Lord_Strength,Arishta_Protections,Protection_Score,Sun_Moon_Support,Start_Price,End_Price,Period_High,High_Date,Period_Low,Low_Date,Notes
+2021-03-11,2022-01-29,AntarDasha,Sun,Rahu,,Rahu,Sun,5.25,10.0,1,1.0,0.0666666666666666,328.28,177.58,357.39,2021-11-09,170.2,2022-01-27,Period adjusted: using stock birth date 2021-04-14 as start date
+2022-01-29,2022-11-13,AntarDasha,Sun,Jupiter,,Jupiter,Sun,2.29,1.13,0,0.0,0.1066666666666666,177.58,57.46,214.5,2022-02-09,45.98,2022-11-09,
+2022-11-13,2023-10-21,AntarDasha,Sun,Saturn,,Saturn,Sun,2.48,1.88,1,1.0,0.15,57.46,74.66,110.15,2023-07-19,32.53,2022-12-28,
+2023-10-21,2024-08-22,AntarDasha,Sun,Mercury,,Mercury,Sun,2.3,1.32,0,0.0,0.0733333333333333,74.66,198.43,279.71,2024-03-25,70.78,2023-10-27,
+2024-08-22,2024-12-26,AntarDasha,Sun,Ketu,,Ketu,Sun,5.22,7.0,0,0.0,0.5420833333333334,198.43,274.41,343.62,2024-12-06,147.35,2024-09-06,
+2024-12-26,2025-12-21,AntarDasha,Sun,Venus,,Venus,Sun,2.93,2.35,0,0.0,0.2233333333333333,274.41,,301.3,2025-01-30,151.47,2025-04-08,

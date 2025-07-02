@@ -110,40 +110,63 @@ class EnhancedDashaStockAnalyzer:
         return None
 
     def calculate_period_performance(self, start_date, end_date):
-        """Calculate performance metrics for a dasha period"""
+        """Calculate stock performance for a given period"""
         try:
-            start_price = self.get_nearest_trading_day_price(start_date)
-            end_price = self.get_nearest_trading_day_price(end_date)
-            
-            if start_price is None or end_price is None:
+            # Get the actual stock data range
+            stock_dates = sorted(self.stock_data.keys())
+            if not stock_dates:
                 return None, None, None, None, None, None
             
-            # Calculate percentage change
-            percent_change = ((end_price - start_price) / start_price) * 100
+            first_stock_date = datetime.strptime(stock_dates[0], '%Y-%m-%d').date()
+            last_stock_date = datetime.strptime(stock_dates[-1], '%Y-%m-%d').date()
             
-            # Find period high and low
+            # If period starts before stock data is available, use stock birth date as start
+            effective_start_date = max(start_date, first_stock_date)
+            
+            # If period ends after available data, use last available date
+            effective_end_date = min(end_date, last_stock_date)
+            
+            # Check if we have any valid period after adjustments
+            if effective_start_date > effective_end_date:
+                return None, None, None, None, None, None
+            
+            # Get start price from effective start date
+            start_price = self.get_nearest_trading_day_price(effective_start_date)
+            if start_price is None:
+                return None, None, None, None, None, None
+            
+            # Get end price
+            end_price = self.get_nearest_trading_day_price(effective_end_date)
+            if end_price is None:
+                return None, None, None, None, None, None
+            
+            # Calculate performance metrics over the effective period
             period_high = start_price
             period_low = start_price
-            period_high_date = start_date.strftime('%Y-%m-%d')
-            period_low_date = start_date.strftime('%Y-%m-%d')
+            high_date = effective_start_date.strftime('%Y-%m-%d')
+            low_date = effective_start_date.strftime('%Y-%m-%d')
             
-            current_date = start_date
-            while current_date <= end_date:
+            # Find highest and lowest prices during the effective period
+            current_date = effective_start_date
+            while current_date <= effective_end_date:
                 date_str = current_date.strftime('%Y-%m-%d')
                 if date_str in self.stock_data:
                     price = self.stock_data[date_str]['price']
                     if price > period_high:
                         period_high = price
-                        period_high_date = date_str
+                        high_date = date_str
                     if price < period_low:
                         period_low = price
-                        period_low_date = date_str
+                        low_date = date_str
                 current_date += timedelta(days=1)
             
-            return percent_change, period_high, period_low, period_high_date, period_low_date, start_price
+            # Calculate percentage change
+            percent_change = ((end_price - start_price) / start_price) * 100
+            
+            return percent_change, period_high, period_low, high_date, low_date, start_price
             
         except Exception as e:
-            print(f"Error calculating performance for period {start_date} to {end_date}: {str(e)}")
+            print(f"Error calculating performance: {str(e)}")
             return None, None, None, None, None, None
 
     def read_dasha_csv(self, csv_file):
@@ -175,54 +198,102 @@ class EnhancedDashaStockAnalyzer:
                 start_date = pd.to_datetime(row['Date']).date()
                 end_date = pd.to_datetime(row['End_Date']).date()
                 
-                # Skip future periods
+                # Skip future periods (periods that haven't started yet)
                 if start_date > datetime.now().date():
                     print(f"   Skipping future period: {start_date} to {end_date}")
                     continue
                 
-                # Adjust end date if it's in the future
+                # Adjust end date if it's in the future (period is ongoing)
+                original_end_date = end_date
                 if end_date > datetime.now().date():
                     end_date = datetime.now().date()
                     print(f"   Adjusted end date to today: {end_date}")
                 
+                # Always create the result row for CSV - include all periods regardless of stock data availability
+                result_row = {
+                    'Date': start_date.strftime('%Y-%m-%d'),
+                    'End_Date': original_end_date.strftime('%Y-%m-%d'),  # Use original end date
+                    'Type': period_type,
+                    'mahadasha_lord': row['mahadasha_lord'] if pd.notna(row['mahadasha_lord']) else '',
+                    'antardasha_lord': row['antardasha_lord'] if pd.notna(row['antardasha_lord']) else '',
+                    'pratyantardasha_lord': row['pratyantardasha_lord'] if pd.notna(row['pratyantardasha_lord']) else '',
+                    'Planet': row['Planet'] if pd.notna(row['Planet']) else '',
+                    'Parent_Planet': row['Parent_Planet'] if pd.notna(row['Parent_Planet']) else '',
+                    'Auspiciousness_Score': row['Auspiciousness_Score'] if pd.notna(row['Auspiciousness_Score']) else '',
+                    'Dasha_Lord_Strength': row['Dasha_Lord_Strength'] if pd.notna(row['Dasha_Lord_Strength']) else '',
+                    'Arishta_Protections': row['Arishta_Protections'] if pd.notna(row['Arishta_Protections']) else '',
+                    'Protection_Score': row['Protection_Score'] if pd.notna(row['Protection_Score']) else '',
+                    'Sun_Moon_Support': row['Sun_Moon_Support'] if pd.notna(row['Sun_Moon_Support']) else '',
+                    'Start_Price': None,
+                    'End_Price': None,
+                    'Period_High': None,
+                    'High_Date': None,
+                    'Period_Low': None,
+                    'Low_Date': None,
+                    'Notes': ''
+                }
+                
+                # Handle empty fields for different period types
+                if period_type == 'MD':  # MahaDasha
+                    result_row['antardasha_lord'] = ''
+                    result_row['pratyantardasha_lord'] = ''
+                elif period_type == 'MD-AD':  # AntarDasha
+                    result_row['pratyantardasha_lord'] = ''
+                
+                # Try to calculate stock performance if data is available
                 percent_change, period_high, period_low, high_date, low_date, start_price = \
                     self.calculate_period_performance(start_date, end_date)
                 
                 if percent_change is not None:
-                    print(f"   ✓ Valid period: {start_date} to {end_date}, change: {percent_change:.2f}%")
-                    # Create result row with appropriate columns based on period type
-                    result_row = {
-                        'Period_Type': period_type,
-                        'Start_Date': start_date.strftime('%Y-%m-%d'),
-                        'End_Date': end_date.strftime('%Y-%m-%d'),
+                    # Check if we had to adjust the start date due to stock availability
+                    stock_dates = sorted(self.stock_data.keys())
+                    first_stock_date = datetime.strptime(stock_dates[0], '%Y-%m-%d').date()
+                    
+                    # Get end price
+                    end_price = self.get_nearest_trading_day_price(end_date)
+                    
+                    # Update result row with stock performance data
+                    result_row.update({
                         'Start_Price': round(start_price, 2),
+                        'End_Price': round(end_price, 2) if end_price is not None else None,
                         'Period_High': round(period_high, 2),
                         'Period_Low': round(period_low, 2),
                         'High_Date': high_date,
-                        'Low_Date': low_date,
-                        'Percent_Change': round(percent_change, 2)
-                    }
-                    
-                    # Add dasha-specific columns based on what's available in the CSV
-                    for col in df.columns:
-                        if col not in ['Date', 'End_Date'] and col in row:
-                            if period_type == 'MahaDasha' and col in ['antardasha_lord', 'pratyantardasha_lord']:
-                                result_row[col] = ''  # Empty for MahaDasha
-                            elif period_type == 'AntarDasha' and col == 'pratyantardasha_lord':
-                                result_row[col] = ''  # Empty for AntarDasha
-                            else:
-                                result_row[col] = row[col] if pd.notna(row[col]) else ''
-                    
-                    results.append(result_row)
-                    
-                    # Chart data
-                    chart_data.append({
-                        'start_date': start_date,
-                        'end_date': end_date,
-                        'percent_change': percent_change,
-                        'period_label': self.get_period_label(row, period_type),
-                        'auspiciousness': row.get('Auspiciousness_Score', 0) if 'Auspiciousness_Score' in row else 0
+                        'Low_Date': low_date
                     })
+                    
+                    if start_date < first_stock_date:
+                        print(f"   ✓ Adjusted period: {start_date} to {end_date} (using stock birth date {first_stock_date} as start)")
+                        # Add note about adjustment
+                        result_row['Notes'] = f"Period adjusted: using stock birth date {first_stock_date} as start date"
+                    else:
+                        print(f"   ✓ Valid period: {start_date} to {end_date}")
+                    
+                    # Chart data (only for Enhanced analysis)
+                    if chart_file is not None and period_type == 'Enhanced':
+                        # Determine period type based on Type field
+                        period_type_label = row.get('Type', '')
+                        if not period_type_label:  # Fallback to determining by fields if Type is empty
+                            if pd.notna(row.get('pratyantardasha_lord')):
+                                period_type_label = 'MD-AD-PD'
+                            elif pd.notna(row.get('antardasha_lord')):
+                                period_type_label = 'MD-AD'
+                            else:
+                                period_type_label = 'MD'
+                            
+                        chart_data.append({
+                            'start_date': start_date,
+                            'end_date': original_end_date,  # Use original end date for chart data
+                            'percent_change': percent_change,
+                            'period_label': self.get_period_label(row, period_type),
+                            'auspiciousness': float(row.get('Auspiciousness_Score', 0)) if pd.notna(row.get('Auspiciousness_Score')) else 0,
+                            'period_type': period_type_label
+                        })
+                else:
+                    print(f"   ⚠️  No price data for period: {start_date} to {end_date}")
+                
+                # Always add the row to results, regardless of stock data availability
+                results.append(result_row)
                 
             except Exception as e:
                 print(f"Error processing row {index}: {str(e)}")
@@ -234,8 +305,9 @@ class EnhancedDashaStockAnalyzer:
             results_df.to_csv(output_file, index=False)
             print(f"✅ Saved {len(results)} analyzed periods to {output_file}")
             
-            # Generate chart
-            self.create_stock_chart(chart_data, chart_file, period_type)
+            # Generate chart only for Enhanced analysis and only if we have chart data
+            if chart_file is not None and period_type == 'Enhanced' and chart_data:
+                self.create_stock_chart(chart_data, chart_file, period_type)
             
             return True
         else:
@@ -264,20 +336,26 @@ class EnhancedDashaStockAnalyzer:
             print(f"❌ No data to chart for {period_type}")
             return
         
-        # Get stock price data for the chart period
-        start_date = min(item['start_date'] for item in chart_data)
-        end_date = max(item['end_date'] for item in chart_data)
+        # Get the actual stock data date range (not period dates)
+        stock_dates = sorted(self.stock_data.keys())
+        if not stock_dates:
+            print(f"❌ No stock data available for chart")
+            return
         
-        # Extend the range slightly
-        start_date -= timedelta(days=30)
-        end_date += timedelta(days=30)
+        # Use stock data range for chart scaling
+        stock_start_date = datetime.strptime(stock_dates[0], '%Y-%m-%d').date()
+        stock_end_date = datetime.strptime(stock_dates[-1], '%Y-%m-%d').date()
         
-        # Get price data
+        # Extend the range slightly for better visualization
+        chart_start_date = stock_start_date - timedelta(days=30)
+        chart_end_date = min(stock_end_date + timedelta(days=30), datetime.now().date())
+        
+        # Get price data for the chart range
         dates = []
         prices = []
-        current_date = start_date
+        current_date = chart_start_date
         
-        while current_date <= end_date:
+        while current_date <= chart_end_date:
             date_str = current_date.strftime('%Y-%m-%d')
             if date_str in self.stock_data:
                 dates.append(current_date)
@@ -294,69 +372,117 @@ class EnhancedDashaStockAnalyzer:
         # Plot stock price
         plt.plot(dates, prices, 'b-', linewidth=2, label=f'{self.stock_symbol} Stock Price', alpha=0.8)
         
-        # Color periods based on performance and auspiciousness
-        for i, period in enumerate(chart_data):
-            start = period['start_date']
-            end = period['end_date']
-            change = period['percent_change']
-            auspiciousness = period.get('auspiciousness', 0)
-            
-            # Color based on auspiciousness score (if available) or performance
-            if auspiciousness != 0:
-                # Use auspiciousness score for coloring (1-5 scale)
-                if auspiciousness >= 4:
-                    color = 'darkgreen'
-                    alpha = 0.3
-                elif auspiciousness >= 3:
-                    color = 'green'
-                    alpha = 0.25
-                elif auspiciousness >= 2:
-                    color = 'yellow'
-                    alpha = 0.2
-                elif auspiciousness >= 1:
-                    color = 'orange'
-                    alpha = 0.25
-                else:
-                    color = 'red'
-                    alpha = 0.3
-            else:
-                # Fall back to performance-based coloring
-                if change >= 20:
-                    color = 'darkgreen'
-                    alpha = 0.3
-                elif change >= 0:
-                    color = 'lightgreen'
-                    alpha = 0.25
-                else:
-                    color = 'lightcoral'
-                    alpha = 0.25
-            
-            # Add period shading
-            plt.axvspan(start, end, color=color, alpha=alpha)
-            
-            # Add period labels (smart positioning)
-            if i % 3 == 0:  # Show every 3rd label to avoid crowding
-                mid_date = start + (end - start) / 2
-                label_text = f"{period['period_label']}\n{change:+.1f}%"
+        # Calculate y-axis ranges for the three sections
+        price_range = max(prices) - min(prices)
+        section_height = price_range / 3
+        
+        # Define y-positions for each dasha type
+        md_y_base = max(prices) - section_height
+        ad_y_base = md_y_base - section_height
+        pd_y_base = min(prices)
+        
+        # Group periods by dasha type
+        mahadashas = []
+        antardashas = []
+        pratyantardashas = []
+        
+        for period in chart_data:
+            period_type = period.get('period_type', '')
+            if period_type == 'MD':
+                mahadashas.append(period)
+            elif period_type == 'MD-AD':
+                antardashas.append(period)
+            elif period_type == 'MD-AD-PD':
+                pratyantardashas.append(period)
+        
+        # Function to get color based on auspiciousness
+        def get_color_and_alpha(auspiciousness):
+            if abs(auspiciousness - 5.0) <= 0.5:
+                return 'yellow', 0.3  # Neutral
+            elif auspiciousness > 5.0:
+                if auspiciousness > 6.5:  # More than 1.5 above 5
+                    return 'green', 0.4
+                else:  # Between 0.5 and 1.5 above 5
+                    return 'lightgreen', 0.35
+            else:  # auspiciousness < 5.0
+                if auspiciousness < 3.5:  # More than 1.5 below 5
+                    return 'red', 0.4
+                else:  # Between 0.5 and 1.5 below 5
+                    return 'lightcoral', 0.35
+        
+        # Function to plot periods in a section
+        def plot_section(periods, y_base, height, label_offset=0.02, period_type=''):
+            for period in periods:
+                original_start = period['start_date']
+                original_end = period['end_date']
+                auspiciousness = period.get('auspiciousness', 0)
                 
-                # Find y position for label
-                mid_prices = [p for d, p in zip(dates, prices) if start <= d <= end]
-                if mid_prices:
-                    y_pos = max(mid_prices) * 1.02
-                else:
-                    y_pos = max(prices) * 1.02
+                # Adjust period dates to stock data availability
+                effective_start = max(original_start, stock_start_date)
+                effective_end = min(original_end, stock_end_date)
                 
-                plt.annotate(label_text, xy=(mid_date, y_pos), 
-                           ha='center', va='bottom', fontsize=8, 
-                           bbox=dict(boxstyle='round,pad=0.3', facecolor=color, alpha=0.7),
-                           rotation=0)
+                # Skip periods that don't overlap with stock data
+                if effective_start > effective_end:
+                    continue
+                
+                # Get color based on auspiciousness
+                color, alpha = get_color_and_alpha(auspiciousness)
+                
+                # Calculate y coordinates for this section
+                y_bottom = y_base
+                y_top = y_base + height
+                
+                # Add period shading
+                plt.fill_between([effective_start, effective_end], 
+                               [y_bottom, y_bottom], 
+                               [y_top, y_top], 
+                               color=color, alpha=alpha)
+                
+                # Add label based on period type
+                mid_date = effective_start + (effective_end - effective_start) / 2
+                label_y = y_top + (height * label_offset)
+                
+                # Determine if we should show the label
+                show_label = False
+                if period_type == 'MD':  # Show all mahadashas
+                    show_label = True
+                elif period_type == 'MD-AD':  # Show all antardashas
+                    show_label = True
+                elif period_type == 'MD-AD-PD':  # Show only significant prayantardashas
+                    show_label = abs(auspiciousness - 5.0) > 1.5
+                
+                if show_label:
+                    label_text = f"{period['period_label']}\n{auspiciousness:.1f}"
+                    plt.annotate(label_text, xy=(mid_date, label_y),
+                               ha='center', va='bottom', fontsize=8,
+                               bbox=dict(boxstyle='round,pad=0.3', facecolor=color, alpha=0.7),
+                               rotation=0)
+        
+        # Plot each section with their respective period types
+        plot_section(mahadashas, md_y_base, section_height, 0.02, 'MD')
+        plot_section(antardashas, ad_y_base, section_height, 0.02, 'MD-AD')
+        plot_section(pratyantardashas, pd_y_base, section_height, 0.02, 'MD-AD-PD')
+        
+        # Add section labels
+        plt.axhline(y=md_y_base, color='gray', linestyle='--', alpha=0.3)
+        plt.axhline(y=ad_y_base, color='gray', linestyle='--', alpha=0.3)
+        plt.text(chart_start_date, md_y_base + section_height/2, 'MahaDasha', 
+                verticalalignment='center', fontsize=10)
+        plt.text(chart_start_date, ad_y_base + section_height/2, 'AntarDasha', 
+                verticalalignment='center', fontsize=10)
+        plt.text(chart_start_date, pd_y_base + section_height/2, 'PratyantarDasha', 
+                verticalalignment='center', fontsize=10)
         
         # Formatting
-        plt.title(f'{self.stock_symbol} Stock Performance - {period_type} Analysis', fontsize=16, fontweight='bold')
+        plt.title(f'{self.stock_symbol} Stock Performance - {period_type} Analysis\n(Chart scaled to available data: {stock_start_date} to {stock_end_date})', 
+                 fontsize=16, fontweight='bold')
         plt.xlabel('Date', fontsize=12)
         plt.ylabel('Stock Price ($)', fontsize=12)
         plt.legend(fontsize=10)
         plt.grid(True, alpha=0.3)
+        
+        # Set x-axis limits to stock data range
+        plt.xlim(chart_start_date, chart_end_date)
         
         # Format x-axis
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
@@ -383,7 +509,7 @@ class EnhancedDashaStockAnalyzer:
         output_path = Path("verification") / symbol / house_system
         output_path.mkdir(parents=True, exist_ok=True)
         
-        # Process each dasha type
+        # Process each dasha type and generate CSV files
         dasha_types = {
             'Enhanced': f'{symbol}_Enhanced_Dasha_Analysis.csv',
             'MahaDasha': f'{symbol}_MahaDashas.csv',
@@ -392,6 +518,7 @@ class EnhancedDashaStockAnalyzer:
         }
         
         success_count = 0
+        enhanced_chart_created = False
         
         for dasha_type, csv_filename in dasha_types.items():
             csv_file = house_path / csv_filename
@@ -400,22 +527,84 @@ class EnhancedDashaStockAnalyzer:
                 print(f"⚠️  CSV file not found: {csv_file}")
                 continue
             
-            # Output files
+            # Output CSV for each dasha type
             output_csv = output_path / f"{symbol}_{dasha_type}_Stock_Performance.csv"
-            output_chart = output_path / f"{symbol}_{dasha_type}_Stock_Chart.png"
+            
+            # Only create chart for Enhanced analysis (one chart per house system)
+            if dasha_type == 'Enhanced' and not enhanced_chart_created:
+                output_chart = output_path / f"{symbol}_Enhanced_Stock_Chart.png"
+                enhanced_chart_created = True
+            else:
+                output_chart = None
             
             # Read and analyze
             df = self.read_dasha_csv(csv_file)
             if df is not None:
+                # Handle gaps in PratyantarDasha and Enhanced data
+                if dasha_type in ['PratyantarDasha', 'Enhanced']:
+                    df = self.fill_pratyantardasha_gaps(df)
+                
                 if self.analyze_periods(df, output_csv, output_chart, dasha_type):
                     success_count += 1
         
         if success_count > 0:
             print(f"✅ Successfully processed {success_count} dasha types for {house_system}")
+            if enhanced_chart_created:
+                print(f"📊 Created Enhanced stock chart for {house_system}")
             return True
         else:
             print(f"❌ No dasha types processed for {house_system}")
             return False
+
+    def fill_pratyantardasha_gaps(self, df):
+        """Fill gaps in PratyantarDasha periods to ensure continuous coverage"""
+        if len(df) == 0:
+            return df
+        
+        # Sort by date
+        df['Date'] = pd.to_datetime(df['Date'])
+        df['End_Date'] = pd.to_datetime(df['End_Date'])
+        df = df.sort_values('Date').reset_index(drop=True)
+        
+        filled_rows = []
+        
+        for i in range(len(df)):
+            current_row = df.iloc[i].copy()
+            filled_rows.append(current_row)
+            
+            # Check if there's a gap before the next period
+            if i < len(df) - 1:
+                next_row = df.iloc[i + 1]
+                current_end = current_row['End_Date']
+                next_start = next_row['Date']
+                
+                # If there's a gap of more than 1 day, create a filler period
+                if (next_start - current_end).days > 1:
+                    gap_start = current_end + pd.Timedelta(days=1)
+                    gap_end = next_start - pd.Timedelta(days=1)
+                    
+                    # Create a filler row based on the previous period's dasha structure
+                    filler_row = current_row.copy()
+                    filler_row['Date'] = gap_start
+                    filler_row['End_Date'] = gap_end
+                    
+                    # Mark as gap-filled period
+                    if 'Notes' in filler_row:
+                        filler_row['Notes'] = f"Gap-filled period"
+                    
+                    filled_rows.append(filler_row)
+                    print(f"   🔧 Filled gap: {gap_start.strftime('%Y-%m-%d')} to {gap_end.strftime('%Y-%m-%d')}")
+        
+        # Convert back to DataFrame
+        filled_df = pd.DataFrame(filled_rows)
+        
+        # Convert dates back to string format for consistency
+        filled_df['Date'] = filled_df['Date'].dt.strftime('%Y-%m-%d')
+        filled_df['End_Date'] = filled_df['End_Date'].dt.strftime('%Y-%m-%d')
+        
+        print(f"   📝 Original periods: {len(df)}, After gap-filling: {len(filled_df)}")
+        
+        return filled_df
 
 def main():
     analyzer = EnhancedDashaStockAnalyzer()
