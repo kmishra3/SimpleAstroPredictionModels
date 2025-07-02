@@ -2876,9 +2876,7 @@ class EnhancedVedicDashaAnalyzer:
             else:
                 combo = f"{current['mahadasha_lord']}-{current['antardasha_lord']}-{current['pratyantardasha_lord']}"
             
-            # Basic significance
-            significance = current.get('astrological_significance', f"{current['mahadasha_lord']} period")[:100]
-            
+            # Create opportunity with basic info first
             opportunity = {
                 'current_date': current['start_date'],
                 'current_end': current['end_date'],
@@ -2887,7 +2885,6 @@ class EnhancedVedicDashaAnalyzer:
                 'next_score': next_score,
                 'score_change': score_change,
                 'md_ad_pd_combo': combo,
-                'astrological_significance': significance,
                 'current_type': current['Type']
             }
             
@@ -2900,6 +2897,8 @@ class EnhancedVedicDashaAnalyzer:
                     'selection_rationale': f'Score improving {score_change:.1f} points from low base',
                     'rationale': 'Buy before surge'
                 })
+                # Add enhanced astrological significance
+                opportunity['astrological_significance'] = self._generate_enhanced_opportunity_significance(opportunity, df)
                 opportunities['buy_opportunities'].append(opportunity)
                 
             elif score_change >= 1.5 and current_score <= 6.0:
@@ -2910,6 +2909,8 @@ class EnhancedVedicDashaAnalyzer:
                     'selection_rationale': f'Score improving {score_change:.1f} points',
                     'rationale': 'Accumulate on improvement'
                 })
+                # Add enhanced astrological significance
+                opportunity['astrological_significance'] = self._generate_enhanced_opportunity_significance(opportunity, df)
                 opportunities['buy_opportunities'].append(opportunity)
                 
             elif score_change <= -2.5 and current_score >= 6.0:
@@ -2920,6 +2921,8 @@ class EnhancedVedicDashaAnalyzer:
                     'selection_rationale': f'Score declining {score_change:.1f} points from high base',
                     'rationale': 'Sell before decline'
                 })
+                # Add enhanced astrological significance
+                opportunity['astrological_significance'] = self._generate_enhanced_opportunity_significance(opportunity, df)
                 opportunities['sell_opportunities'].append(opportunity)
                 
             elif score_change <= -1.5 and current_score >= 5.5:
@@ -2930,6 +2933,8 @@ class EnhancedVedicDashaAnalyzer:
                     'selection_rationale': f'Score declining {score_change:.1f} points',
                     'rationale': 'Take profits on decline'
                 })
+                # Add enhanced astrological significance
+                opportunity['astrological_significance'] = self._generate_enhanced_opportunity_significance(opportunity, df)
                 opportunities['sell_opportunities'].append(opportunity)
                 
             elif abs(score_change) <= 1.0:
@@ -2940,6 +2945,8 @@ class EnhancedVedicDashaAnalyzer:
                     'selection_rationale': f'Stable score (change: {score_change:.1f})',
                     'rationale': 'Maintain current strategy'
                 })
+                # Add enhanced astrological significance
+                opportunity['astrological_significance'] = self._generate_enhanced_opportunity_significance(opportunity, df)
                 opportunities['hold_recommendations'].append(opportunity)
         
         # Sort by date ascending (chronological order)
@@ -3449,6 +3456,193 @@ class EnhancedVedicDashaAnalyzer:
             'career_significance': career_significance,
             'dashamsha_number': d10_planet_data.get('dashamsha_number', 1)
         }
+
+    def _generate_enhanced_opportunity_significance(self, opportunity: Dict[str, Any], df: pd.DataFrame) -> str:
+        """Generate comprehensive astrological significance for investment opportunities including D1/D9/D10 analysis"""
+        try:
+            # Find the period in dataframe matching this opportunity
+            current_date = opportunity['current_date']
+            matching_periods = df[df['start_date'] == current_date]
+            
+            if matching_periods.empty:
+                return opportunity.get('astrological_significance', 'No astrological data available')
+            
+            period = matching_periods.iloc[0]
+            significance_parts = []
+            
+            # Get basic dasha information
+            dasha_lord = period.get('mahadasha_lord', 'Unknown')
+            period_type = period.get('Type', 'Unknown')
+            
+            # Add period structure context
+            if period_type == 'MD':
+                significance_parts.append(f"**{dasha_lord} Mahadasha:** Major 16-year planetary cycle")
+            elif period_type == 'MD-AD':
+                antardasha = period.get('antardasha_lord', 'Unknown')
+                significance_parts.append(f"**{dasha_lord}-{antardasha} Period:** {antardasha} sub-cycle within {dasha_lord} major period")
+            else:
+                antardasha = period.get('antardasha_lord', 'Unknown')
+                pratyantardasha = period.get('pratyantardasha_lord', 'Unknown')
+                significance_parts.append(f"**{dasha_lord}-{antardasha}-{pratyantardasha}:** Micro-cycle for precise timing")
+            
+            # D1 (Rashi) Analysis
+            d1_parts = []
+            d1_score = period.get('D1_Score', period.get('auspiciousness_score', 0))
+            if d1_score > 0:
+                if d1_score >= 8.0:
+                    d1_parts.append(f"D1 Score: {d1_score:.1f} (Exceptional immediate conditions)")
+                elif d1_score >= 6.0:
+                    d1_parts.append(f"D1 Score: {d1_score:.1f} (Strong immediate potential)")
+                elif d1_score >= 4.0:
+                    d1_parts.append(f"D1 Score: {d1_score:.1f} (Moderate immediate conditions)")
+                else:
+                    d1_parts.append(f"D1 Score: {d1_score:.1f} (Challenging immediate environment)")
+            
+            # Add planetary strength context
+            planet_strength = period.get('planet_strength', 'Unknown')
+            if planet_strength != 'Unknown':
+                d1_parts.append(f"{dasha_lord} strength: {planet_strength}")
+            
+            if d1_parts:
+                significance_parts.append(f"**D1 (Immediate Market):** {' | '.join(d1_parts)}")
+            
+            # D9 (Navamsha) Analysis
+            has_navamsha = any(col in df.columns for col in ['D9_Score', 'Navamsha_Effect'])
+            if has_navamsha:
+                d9_parts = []
+                d9_score = period.get('D9_Score', 0)
+                if d9_score > 0:
+                    d9_effect = d9_score - d1_score
+                    if d9_effect > 1.0:
+                        d9_parts.append(f"D9 Score: {d9_score:.1f} (Strengthens foundation +{d9_effect:.1f})")
+                    elif d9_effect < -1.0:
+                        d9_parts.append(f"D9 Score: {d9_score:.1f} (Weakens sustainability {d9_effect:.1f})")
+                    else:
+                        d9_parts.append(f"D9 Score: {d9_score:.1f} (Balanced foundation {d9_effect:+.1f})")
+                
+                # Vargottama status
+                if period.get('D9_Vargottama', 'No') == 'Yes':
+                    d9_parts.append("Vargottama (exceptional strength)")
+                
+                # D9 sign
+                d9_sign = period.get('D9_Sign', '')
+                if d9_sign:
+                    d9_parts.append(f"D9 in {d9_sign}")
+                
+                navamsha_effect = period.get('Navamsha_Effect', '')
+                if navamsha_effect:
+                    if 'Strengthens' in navamsha_effect:
+                        d9_parts.append("Enhances long-term sustainability")
+                    elif 'Weakens' in navamsha_effect:
+                        d9_parts.append("Reduces long-term stability")
+                
+                if d9_parts:
+                    significance_parts.append(f"**D9 (Sustainability):** {' | '.join(d9_parts)}")
+            
+            # D10 (Dashamsha) Analysis
+            has_dashamsha = any(col in df.columns for col in ['D10_Score', 'D10_Deity'])
+            if has_dashamsha:
+                d10_parts = []
+                d10_score = period.get('D10_Score', 0)
+                if d10_score > 0:
+                    d10_effect = d10_score - d1_score
+                    if d10_effect > 1.0:
+                        d10_parts.append(f"D10 Score: {d10_score:.1f} (Enhances career potential +{d10_effect:.1f})")
+                    elif d10_effect < -1.0:
+                        d10_parts.append(f"D10 Score: {d10_score:.1f} (Challenges career growth {d10_effect:.1f})")
+                    else:
+                        d10_parts.append(f"D10 Score: {d10_score:.1f} (Balanced career influence {d10_effect:+.1f})")
+                
+                # D10 Vargottama
+                if period.get('D10_Vargottama', 'No') == 'Yes':
+                    d10_parts.append("Career Vargottama (exceptional professional strength)")
+                
+                # Deity analysis
+                d10_deity = period.get('D10_Deity', '')
+                if d10_deity:
+                    deity_meanings = {
+                        'Indra': 'Leadership & Authority',
+                        'Agni': 'Innovation & Energy',
+                        'Yama': 'Law & Justice',
+                        'Rakshasa': 'Competition & Politics',
+                        'Varuna': 'Creativity & Arbitration',
+                        'Vayu': 'Communication & Media',
+                        'Kubera': 'Finance & Wealth',
+                        'Isan': 'Healing & Counseling',
+                        'Brahma': 'Innovation & Creation',
+                        'Ananth': 'Stability & Service'
+                    }
+                    deity_meaning = deity_meanings.get(d10_deity, 'Professional influence')
+                    d10_parts.append(f"{d10_deity} deity ({deity_meaning})")
+                
+                # D10 career significance
+                d10_career = period.get('D10_Career', '')
+                if d10_career and len(d10_career) > 10:
+                    d10_parts.append(f"Career focus: {d10_career[:50]}...")
+                
+                if d10_parts:
+                    significance_parts.append(f"**D10 (Career/Professional):** {' | '.join(d10_parts)}")
+            
+            # Combined Analysis & Investment Rationale
+            rationale_parts = []
+            
+            # Analyze the investment decision logic
+            action = opportunity.get('action', 'HOLD')
+            score_change = opportunity.get('score_change', 0)
+            current_score = opportunity.get('current_score', 0)
+            
+            if action in ['STRONG BUY', 'BUY']:
+                if score_change >= 3.0:
+                    rationale_parts.append(f"**Entry Logic:** Major improvement expected ({score_change:+.1f} points)")
+                elif score_change >= 2.0:
+                    rationale_parts.append(f"**Entry Logic:** Significant improvement expected ({score_change:+.1f} points)")
+                else:
+                    rationale_parts.append(f"**Entry Logic:** Moderate improvement expected ({score_change:+.1f} points)")
+                
+                if current_score <= 4.0:
+                    rationale_parts.append("buying at cycle bottom for maximum upside")
+                elif current_score <= 6.0:
+                    rationale_parts.append("accumulating during growth phase")
+                
+            elif action in ['STRONG SELL', 'SELL']:
+                if score_change <= -3.0:
+                    rationale_parts.append(f"**Exit Logic:** Major decline expected ({score_change:.1f} points)")
+                elif score_change <= -2.0:
+                    rationale_parts.append(f"**Exit Logic:** Significant decline expected ({score_change:.1f} points)")
+                else:
+                    rationale_parts.append(f"**Exit Logic:** Moderate decline expected ({score_change:.1f} points)")
+                
+                if current_score >= 7.0:
+                    rationale_parts.append("selling at cycle peak to protect gains")
+                elif current_score >= 5.5:
+                    rationale_parts.append("reducing exposure before challenging period")
+            
+            # Multi-chart confirmation
+            chart_confirmation = []
+            if has_navamsha and has_dashamsha:
+                # Check which chart is leading the decision
+                if hasattr(period, 'get') and period.get('Navamsha_Effect', ''):
+                    if 'Strengthens' in period.get('Navamsha_Effect', ''):
+                        chart_confirmation.append("D9 confirms sustainability")
+                    elif 'Weakens' in period.get('Navamsha_Effect', ''):
+                        chart_confirmation.append("D9 warns of foundation issues")
+                
+                if period.get('D10_Career', ''):
+                    if any(word in period.get('D10_Career', '').lower() for word in ['strong', 'excellent', 'favorable']):
+                        chart_confirmation.append("D10 supports professional growth")
+                    elif any(word in period.get('D10_Career', '').lower() for word in ['challenging', 'difficult', 'weak']):
+                        chart_confirmation.append("D10 indicates career headwinds")
+            
+            if chart_confirmation:
+                rationale_parts.append(f"**Multi-Chart Confirmation:** {' & '.join(chart_confirmation)}")
+            
+            if rationale_parts:
+                significance_parts.append(' | '.join(rationale_parts))
+            
+            return ' | '.join(significance_parts) if significance_parts else opportunity.get('astrological_significance', 'Analysis pending')
+            
+        except Exception as e:
+            return f"Significance analysis error: {str(e)}"
 
 def main():
     """Main execution function with command-line argument parsing"""
