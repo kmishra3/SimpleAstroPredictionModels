@@ -444,47 +444,91 @@ class EnhancedDashaStockAnalyzer:
             periods = sorted(periods, key=lambda x: x['start_date'])
             
             # Different logic for different period types
-            if period_type == 'MD-AD-PD':  # Pratyantardashas - show 6 strongest non-consecutive
+            if period_type == 'MD-AD-PD':  # Pratyantardashas - show up to 10 strongest, well-distributed
                 # Always include first and last
                 first_period = periods[0]
                 last_period = periods[-1]
                 
-                # For middle periods, get the strongest non-consecutive periods
+                # For middle periods, get all periods sorted by strength
                 middle_periods = periods[1:-1] if len(periods) > 2 else []
                 middle_periods_sorted = sorted(middle_periods, 
                                              key=lambda x: abs(x.get('auspiciousness', 5.0) - 5.0), 
                                              reverse=True)
                 
-                # Select non-consecutive periods
-                selected_periods = [first_period]
+                # Calculate total time span
+                total_span = (last_period['end_date'] - first_period['start_date']).days
+                min_gap = max(15, total_span / 20)  # Adaptive gap based on total span
                 
-                for candidate in middle_periods_sorted:
-                    # Check if this candidate is consecutive with any already selected period
-                    is_consecutive = False
-                    for selected in selected_periods:
-                        if periods_overlap(candidate, selected, min_gap_days=15):  # Smaller gap for pratyantardashas
-                            is_consecutive = True
-                            break
+                # Divide the total span into sections
+                num_sections = 8  # Number of sections to aim for
+                section_length = total_span / num_sections
+                
+                # Initialize sections
+                sections = [[] for _ in range(num_sections)]
+                
+                # Distribute periods into sections
+                for period in middle_periods:
+                    period_mid = period['start_date'] + (period['end_date'] - period['start_date']) / 2
+                    section_idx = int((period_mid - first_period['start_date']).days / section_length)
+                    if 0 <= section_idx < num_sections:
+                        sections[section_idx].append(period)
+                
+                # Select strongest period from each section
+                selected_periods = [first_period]  # Start with first period
+                
+                # First pass: Get strongest from each section
+                for section in sections:
+                    if section:
+                        # Sort section by auspiciousness
+                        section_sorted = sorted(section,
+                                             key=lambda x: abs(x.get('auspiciousness', 5.0) - 5.0),
+                                             reverse=True)
+                        
+                        # Try to add strongest period that doesn't overlap
+                        for period in section_sorted:
+                            is_consecutive = False
+                            for selected in selected_periods:
+                                if periods_overlap(period, selected, min_gap_days=min_gap):
+                                    is_consecutive = True
+                                    break
+                            
+                            if not is_consecutive:
+                                selected_periods.append(period)
+                                break
+                
+                # Second pass: Fill remaining slots with strongest periods that maintain spacing
+                remaining_slots = 10 - len(selected_periods) - 1  # -1 for last_period
+                if remaining_slots > 0:
+                    # Get all unselected periods
+                    used_periods = set(selected_periods)
+                    remaining_candidates = [p for p in middle_periods_sorted if p not in used_periods]
                     
-                    if not is_consecutive:
-                        selected_periods.append(candidate)
-                        # Stop when we have 6 total (including first and last)
-                        if len(selected_periods) >= 5:  # 5 because we'll add last_period
-                            break
+                    for candidate in remaining_candidates:
+                        is_consecutive = False
+                        for selected in selected_periods:
+                            if periods_overlap(candidate, selected, min_gap_days=min_gap):
+                                is_consecutive = True
+                                break
+                        
+                        if not is_consecutive:
+                            selected_periods.append(candidate)
+                            remaining_slots -= 1
+                            if remaining_slots <= 0:
+                                break
                 
-                # Add last period if it's not already included and not consecutive with the last selected
+                # Add last period if it's not consecutive or if we have room
                 if last_period not in selected_periods:
-                    # Check if last period is consecutive with any selected period
                     is_consecutive = False
                     for selected in selected_periods:
-                        if periods_overlap(last_period, selected, min_gap_days=15):
+                        if periods_overlap(last_period, selected, min_gap_days=min_gap):
                             is_consecutive = True
                             break
                     
-                    if not is_consecutive or len(selected_periods) < 6:
+                    if not is_consecutive or len(selected_periods) < 10:
                         selected_periods.append(last_period)
                 
-                periods_to_show = selected_periods
+                # Sort final selection by date
+                periods_to_show = sorted(selected_periods, key=lambda x: x['start_date'])
                 
             else:  # Mahadashas and Antardashas - show all with overlap filtering
                 # Always show first and last periods
@@ -540,6 +584,11 @@ class EnhancedDashaStockAnalyzer:
                                [y_top, y_top], 
                                color=color, alpha=alpha)
                 
+                # Add vertical line at period end to separate consecutive periods
+                plt.axvline(x=effective_end, ymin=(y_bottom-min(prices))/(max(prices)-min(prices)), 
+                          ymax=(y_top-min(prices))/(max(prices)-min(prices)), 
+                          color='gray', linewidth=1, alpha=0.4)
+                
                 # Add label if this period should be shown
                 if period in periods_to_show:
                     mid_date = effective_start + (effective_end - effective_start) / 2
@@ -561,9 +610,12 @@ class EnhancedDashaStockAnalyzer:
         plot_section(antardashas, ad_y_base, section_height, 0.02, 'MD-AD')
         plot_section(pratyantardashas, pd_y_base, section_height, 0.02, 'MD-AD-PD')
         
+        # Add section boundaries and labels
+        # Dark, highly visible boundary lines
+        plt.axhline(y=md_y_base, color='black', linestyle='-', linewidth=2, alpha=0.8)
+        plt.axhline(y=ad_y_base, color='black', linestyle='-', linewidth=2, alpha=0.8)
+        
         # Add section labels
-        plt.axhline(y=md_y_base, color='gray', linestyle='--', alpha=0.3)
-        plt.axhline(y=ad_y_base, color='gray', linestyle='--', alpha=0.3)
         plt.text(chart_start_date, md_y_base + section_height/2, 'MahaDasha', 
                 verticalalignment='center', fontsize=10)
         plt.text(chart_start_date, ad_y_base + section_height/2, 'AntarDasha', 
