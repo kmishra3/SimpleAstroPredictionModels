@@ -1,0 +1,10 @@
+Date,End_Date,Type,mahadasha_lord,antardasha_lord,pratyantardasha_lord,Planet,Parent_Planet,Auspiciousness_Score,Dasha_Lord_Strength,Arishta_Protections,Protection_Score,Sun_Moon_Support,Astrological_Significance
+2016-10-03,2022-10-03,MD,Sun,,,Sun,,2.36,0.6666666666666666,1,1.0,0.14666666666666667,Sun dasha (malefic); lord in challenged (debilitated/enemy sign); moderate protective influence; challenging luminaries configuration
+2022-10-03,2032-10-02,MD,Moon,,,Moon,,3.69,3.0,0,0.0,0.14666666666666667,Moon dasha (benefic); lord in challenged (debilitated/enemy sign); challenging luminaries configuration
+2032-10-02,2039-10-03,MD,Mars,,,Mars,,4.29,4.3999999999999995,2,1.0,0.22333333333333333,Mars dasha (malefic); lord in moderate strength; strong protective cancellations; challenging luminaries configuration
+2039-10-03,2057-10-02,MD,Rahu,,,Rahu,,5.65,10.0,1,1.0,0.10666666666666666,Rahu dasha (malefic); lord in exceptionally strong (exalted/own sign); moderate protective influence; challenging luminaries configuration
+2057-10-02,2073-10-02,MD,Jupiter,,,Jupiter,,3.56,3.0,0,0.0,0.07333333333333333,Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); challenging luminaries configuration
+2073-10-02,2092-10-02,MD,Saturn,,,Saturn,,6.17,10.0,2,1.0,0.14666666666666667,Saturn dasha (malefic); lord in exceptionally strong (exalted/own sign); strong protective cancellations; challenging luminaries configuration
+2092-10-02,2109-10-03,MD,Mercury,,,Mercury,,4.2,4.3999999999999995,0,0.0,0.14666666666666667,Mercury dasha (benefic); lord in moderate strength; challenging luminaries configuration
+2109-10-03,2116-10-03,MD,Ketu,,,Ketu,,3.13,3.0,1,1.0,0.10666666666666666,Ketu dasha (malefic); lord in challenged (debilitated/enemy sign); moderate protective influence; challenging luminaries configuration
+2116-10-03,2136-10-03,MD,Venus,,,Venus,,3.28,1.4666666666666668,0,0.0,0.22333333333333333,Venus dasha (benefic); lord in challenged (debilitated/enemy sign); challenging luminaries configuration
