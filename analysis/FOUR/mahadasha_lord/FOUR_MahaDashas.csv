@@ -1,0 +1,10 @@
+Date,End_Date,Type,mahadasha_lord,antardasha_lord,pratyantardasha_lord,Planet,Parent_Planet,Auspiciousness_Score,Dasha_Lord_Strength,Arishta_Protections,Protection_Score,Sun_Moon_Support,Astrological_Significance
+2017-03-03,2034-03-03,MD,Mercury,,,Mercury,,5.17,6.25,1,1.0,0.06666666666666667,Mercury dasha (benefic); lord in moderate strength; moderate protective influence; challenging luminaries configuration
+2034-03-03,2041-03-03,MD,Ketu,,,Ketu,,2.71,1.4666666666666668,1,1.0,0.18333333333333332,Ketu dasha (malefic); lord in challenged (debilitated/enemy sign); moderate protective influence; challenging luminaries configuration
+2041-03-03,2061-03-03,MD,Venus,,,Venus,,7.04,10.0,2,1.0,0.10666666666666666,Venus dasha (benefic); lord in exceptionally strong (exalted/own sign); strong protective cancellations; challenging luminaries configuration
+2061-03-03,2067-03-04,MD,Sun,,,Sun,,2.56,1.4666666666666668,0,0.0,0.3458333333333333,Sun dasha (malefic); lord in challenged (debilitated/enemy sign); challenging luminaries configuration
+2067-03-04,2077-03-03,MD,Moon,,,Moon,,3.21,1.4666666666666668,0,0.0,0.18333333333333332,Moon dasha (benefic); lord in challenged (debilitated/enemy sign); challenging luminaries configuration
+2077-03-03,2084-03-03,MD,Mars,,,Mars,,2.71,1.4666666666666668,1,1.0,0.18333333333333332,Mars dasha (malefic); lord in challenged (debilitated/enemy sign); moderate protective influence; challenging luminaries configuration
+2084-03-03,2102-03-04,MD,Rahu,,,Rahu,,3.11,4.3999999999999995,0,0.0,0.06666666666666667,Rahu dasha (malefic); lord in moderate strength; challenging luminaries configuration
+2102-03-04,2118-03-04,MD,Jupiter,,,Jupiter,,3.66,1.4666666666666668,1,1.0,0.18333333333333332,Jupiter dasha (benefic); lord in challenged (debilitated/enemy sign); moderate protective influence; challenging luminaries configuration
+2118-03-04,2137-03-04,MD,Saturn,,,Saturn,,2.03,0.0,0,0.0,0.3458333333333333,Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); challenging luminaries configuration

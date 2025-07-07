@@ -1,0 +1,10 @@
+Date,End_Date,Type,mahadasha_lord,antardasha_lord,pratyantardasha_lord,Planet,Parent_Planet,Auspiciousness_Score,Dasha_Lord_Strength,Arishta_Protections,Protection_Score,Sun_Moon_Support,Astrological_Significance
+2018-11-30,2034-11-30,MD,Jupiter,,,Jupiter,,4.92,4.3999999999999995,1,1.0,0.3,Jupiter dasha (benefic); lord in moderate strength; moderate protective influence; challenging luminaries configuration
+2034-11-30,2053-11-30,MD,Saturn,,,Saturn,,2.36,0.3333333333333333,0,0.0,0.4625,Saturn dasha (malefic); lord in challenged (debilitated/enemy sign); balanced solar-lunar influence
+2053-11-30,2070-11-30,MD,Mercury,,,Mercury,,4.26,3.0,0,0.0,0.4625,Mercury dasha (benefic); lord in challenged (debilitated/enemy sign); balanced solar-lunar influence
+2070-11-30,2077-11-30,MD,Ketu,,,Ketu,,2.33,1.4666666666666668,0,0.0,0.22333333333333333,Ketu dasha (malefic); lord in challenged (debilitated/enemy sign); challenging luminaries configuration
+2077-11-30,2097-11-30,MD,Venus,,,Venus,,4.6,3.0,0,0.0,0.65,Venus dasha (benefic); lord in challenged (debilitated/enemy sign); balanced solar-lunar influence
+2097-11-30,2103-12-02,MD,Sun,,,Sun,,4.29,4.3999999999999995,2,1.0,0.22333333333333333,Sun dasha (malefic); lord in moderate strength; strong protective cancellations; challenging luminaries configuration
+2103-12-02,2113-12-01,MD,Moon,,,Moon,,3.44,0.6666666666666666,1,1.0,0.22333333333333333,Moon dasha (benefic); lord in challenged (debilitated/enemy sign); moderate protective influence; challenging luminaries configuration
+2113-12-01,2120-12-01,MD,Mars,,,Mars,,3.48,3.0,1,1.0,0.3,Mars dasha (malefic); lord in challenged (debilitated/enemy sign); moderate protective influence; challenging luminaries configuration
+2120-12-01,2138-12-01,MD,Rahu,,,Rahu,,3.16,1.4666666666666668,2,1.0,0.18333333333333332,Rahu dasha (malefic); lord in challenged (debilitated/enemy sign); strong protective cancellations; challenging luminaries configuration
